@@ -10,11 +10,16 @@ import java.util.List;
 public class TransactionOne {
 
     void transaction1(Integer C_ID, Integer W_ID, Integer D_ID, Integer num_items){
+
+        //Note : Numbers or alphabet comments above a sequence of code lines indicate which part of problem statement it is related to. Refer section 2.1, Processing steps in project document.
+
         Framework framework = Framework.getInstance();
         Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
 
-        //Query q0 = session.createQuery("SELECT D_NEXT_O_ID, D_TAX from District where D_W_ID = :warehouseId and D_ID = :districtId");
+        List<T1Input> list = new ArrayList<T1Input>();
+
+        //1, 6
         Query q0 = session.createNativeQuery("SELECT D_NEXT_O_ID, D_TAX, W_TAX, C_DISCOUNT from district, warehouse, customer where D_ID = :d_id and D_W_ID = :w_id and W_ID = :w_id and C_ID = :c_id and C_W_ID = :w_id and C_D_ID = :d_id");
         q0.setParameter("d_id", D_ID);
         q0.setParameter("w_id", W_ID);
@@ -25,11 +30,13 @@ public class TransactionOne {
         double w_tax = (double) districtList[2];
         double c_discount = (double) districtList[3];
 
+        //2
         Query q1 = session.createQuery("UPDATE District SET D_NEXT_O_ID = D_NEXT_O_ID - 1 WHERE D_W_ID = :warehouseId AND D_ID = :districtId");
         q1.setParameter("warehouseId", W_ID);
         q1.setParameter("districtId", D_ID);
         q1.executeUpdate();
 
+        //3
         //int allLocal = checkAllLocal(inputs, W_ID);
         int allLocal = 1;
         String s2 = "INSERT INTO Order (O_W_ID, O_D_ID, O_ID, O_C_ID, O_CARRIER_ID, O_OL_CNT, O_ALL_LOCAL, O_ENTRY_D) VALUES (:w_id, :d_id, :n, :c_id, :carrier_id, :ol_cnt, :all_local, :entry_d)";
@@ -44,10 +51,23 @@ public class TransactionOne {
         q2.setParameter("entry_d", String.valueOf(java.time.LocalTime.now()));
         q2.executeUpdate();
 
-        List<T1Input> list = new ArrayList<T1Input>();
+        //4
         double totalAmount = 0.0;
 
-        //processing for all items
+        //5 (g)
+        StringBuilder insertOrderLineQueryBuilder = new StringBuilder("INSERT INTO OrderLine (OL_O_ID, OL_D_ID, OL_W_ID, OL_NUMBER, OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DELIVERY_D, OL_DIST_INFO) VALUES ");
+        StringBuilder insertOrderLineValuesQueryBuilder = new StringBuilder();
+
+        //5 (e)
+        StringBuilder getItemPriceQueryBuilder = new StringBuilder("SELECT I_PRICE FROM Item WHERE I_ID IN (");
+        for(int i=0; i<num_items; i++){
+            int itemNumber = list.get(i).itemNumber;
+            getItemPriceQueryBuilder.append((i < num_items-1) ? itemNumber + "," : itemNumber + ")");
+        }
+        Query getItemPrice = session.createQuery(new String(getItemPriceQueryBuilder));
+        List<Double> itemPriceList = getItemPrice.getResultList();
+
+        //5
         for(int i=0; i<num_items; i++){
             int itemNumber = list.get(i).itemNumber;
             int supplierWarehouseNumber = list.get(i).supplierWarehouseNumber;
@@ -76,34 +96,29 @@ public class TransactionOne {
             updateStock.executeUpdate();
 
             //e
-            Query getItemPrice = session.createQuery("SELECT I_PRICE FROM Item WHERE I_ID = :i_id");
-            getItemPrice.setParameter("i_id", itemNumber);
-
-            double itemPrice = (double) getItemPrice.getSingleResult();
-            double itemAmount = quantity * itemPrice;
+            double itemAmount = quantity * itemPriceList.get(i);
 
             //f
             totalAmount += itemAmount;
 
             //g
-            String orderLine = "INSERT INTO OrderLine (OL_O_ID, OL_D_ID, OL_W_ID, OL_NUMBER, OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DELIVERY_D, OL_DIST_INFO) VALUES (:N, :d_id, :w_id, :i, :i_id, :supplier_w_id, :quantity, :item_amount, :n, :dist)";
-            Query orderLineQuery = session.createQuery(orderLine);
-            orderLineQuery.setParameter("N", N);
-            orderLineQuery.setParameter("d_id", D_ID);
-            orderLineQuery.setParameter("w_id", W_ID);
-            orderLineQuery.setParameter("i", i);
-            orderLineQuery.setParameter("i_id", itemNumber);
-            orderLineQuery.setParameter("supplier_w_id", supplierWarehouseNumber);
-            orderLineQuery.setParameter("quantity", quantity);
-            orderLineQuery.setParameter("item_amount", itemAmount);
-            orderLineQuery.setParameter("n", null);
-            orderLineQuery.setParameter("dist", "S_DIST_"+D_ID);
-            orderLineQuery.executeUpdate();
+            insertOrderLineValuesQueryBuilder.append(String.format("(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", N, D_ID, W_ID, i, itemNumber, supplierWarehouseNumber, quantity, itemAmount, null, "'"+"S_DIST_"+D_ID+"'"));
+            insertOrderLineValuesQueryBuilder.append((i < num_items-1) ? ", " : "");
         }
 
-        totalAmount = totalAmount * (1 + d_tax + w_tax) * (1 - c_discount);
-        framework.commitTransaction(transaction);
+        //5 (g) - bulk insert instead of multiple single-inserts
+        insertOrderLineQueryBuilder.append(insertOrderLineValuesQueryBuilder);
+        String orderLineString = new String(insertOrderLineQueryBuilder);
+        Query orderLineQuery = session.createNativeQuery(orderLineString);
+        orderLineQuery.executeUpdate();
 
+        //6
+        totalAmount = totalAmount * (1 + d_tax + w_tax) * (1 - c_discount);
+
+
+
+
+        framework.commitTransaction(transaction);
     }
 
     public int checkAllLocal(List<T1Input> inputs, int W_ID){
@@ -115,25 +130,45 @@ public class TransactionOne {
     }
 
     public void sampletest(){
-        int W_ID = 1;
-        int D_ID = 1;
-        int C_ID = 1279;
         Framework framework = Framework.getInstance();
         Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
 
-        //Query q0 = session.createQuery("SELECT D_NEXT_O_ID, D_TAX from District where D_W_ID = :warehouseId and D_ID = :districtId");
-        Query q0 = session.createNativeQuery("SELECT D_NEXT_O_ID, D_TAX, W_TAX, C_DISCOUNT from district, warehouse, customer where D_ID = :d_id and D_W_ID = :w_id and W_ID = :w_id and C_ID = :c_id and C_W_ID = :w_id and C_D_ID = :d_id");
-        q0.setParameter("d_id", D_ID);
-        q0.setParameter("w_id", W_ID);
-        q0.setParameter("c_id", C_ID);
-        Object[] districtList = (Object[]) q0.getSingleResult();
-        int N = (int) districtList[0];
-        double d_tax = (double) districtList[1];
-        double w_tax = (double) districtList[2];
-        double c_discount = (double) districtList[3];
+        int W_ID = 3;
+        int D_ID = 3;
+        int C_ID = 1281;
 
-        System.out.println(N + " " + d_tax + " " + w_tax + " " + c_discount);
+        List<T1Input> list = new ArrayList<T1Input>();
+        list.add(new T1Input(1,2,10));
+        list.add(new T1Input(2,2,10));
+        list.add(new T1Input(3,2,10));
+        list.add(new T1Input(4,2,10));
+        double totalAmount = 0.0;
+
+
+        int num_items = 4;
+        StringBuilder p = new StringBuilder("SELECT I_PRICE FROM Item WHERE I_ID IN (");
+
+        for(int i=0; i<num_items; i++){
+            int itemNumber = list.get(i).itemNumber;
+            p.append((i < num_items-1) ? itemNumber + "," : itemNumber + ")");
+        }
+        Query getItemPrice = session.createQuery(new String(p));
+        List<Double> itemPriceList = getItemPrice.getResultList();
+
+        for(double itemPrice : itemPriceList)
+            System.out.println(itemPrice);
+
+        for(int i=0; i<num_items; i++){
+            int itemNumber = list.get(i).itemNumber;
+            int supplierWarehouseNumber = list.get(i).supplierWarehouseNumber;
+            int quantity = list.get(i).quantity;
+
+            double itemAmount = quantity * itemPriceList.get(i);
+            totalAmount += itemAmount;
+        }
+
+
 
         session.flush();
         framework.commitTransaction(transaction);
@@ -154,4 +189,10 @@ class T1Input {
     Integer itemNumber;
     Integer supplierWarehouseNumber;
     Integer quantity;
+
+    T1Input(int itemNumber, int supplierWarehouseNumber, int quantity){
+        this.itemNumber = itemNumber;
+        this.supplierWarehouseNumber = supplierWarehouseNumber;
+        this.quantity = quantity;
+    }
 }
