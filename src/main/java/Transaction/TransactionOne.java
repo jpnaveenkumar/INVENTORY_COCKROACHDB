@@ -14,12 +14,16 @@ public class TransactionOne {
         Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
 
-        Query q0 = session.createQuery("SELECT D_NEXT_O_ID from District where D_W_ID = :warehouseId and D_ID = :districtId");
-        q0.setParameter("warehouseId", W_ID);
-        q0.setParameter("districtId", D_ID);
-        int N = (int) q0.getSingleResult();
-
-        System.out.println("D_NEXT_O_ID: " + N);
+        //Query q0 = session.createQuery("SELECT D_NEXT_O_ID, D_TAX from District where D_W_ID = :warehouseId and D_ID = :districtId");
+        Query q0 = session.createNativeQuery("SELECT D_NEXT_O_ID, D_TAX, W_TAX, C_DISCOUNT from district, warehouse, customer where D_ID = :d_id and D_W_ID = :w_id and W_ID = :w_id and C_ID = :c_id and C_W_ID = :w_id and C_D_ID = :d_id");
+        q0.setParameter("d_id", D_ID);
+        q0.setParameter("w_id", W_ID);
+        q0.setParameter("c_id", C_ID);
+        Object[] districtList = (Object[]) q0.getSingleResult();
+        int N = (int) districtList[0];
+        double d_tax = (double) districtList[1];
+        double w_tax = (double) districtList[2];
+        double c_discount = (double) districtList[3];
 
         Query q1 = session.createQuery("UPDATE District SET D_NEXT_O_ID = D_NEXT_O_ID - 1 WHERE D_W_ID = :warehouseId AND D_ID = :districtId");
         q1.setParameter("warehouseId", W_ID);
@@ -96,18 +100,6 @@ public class TransactionOne {
             orderLineQuery.setParameter("dist", "S_DIST_"+D_ID);
             orderLineQuery.executeUpdate();
         }
-        //get taxes and discount
-        Query getDistrictTax = session.createQuery("SELECT D_TAX FROM District WHERE D_ID = :d_id");
-        getDistrictTax.setParameter("d_id", D_ID);
-        double d_tax = (double) getDistrictTax.getSingleResult();
-
-        Query getWareHouseTax = session.createQuery("SELECT W_TAX FROM Warehouse WHERE W_ID = :w_id");
-        getWareHouseTax.setParameter("w_id", W_ID);
-        double w_tax = (double) getWareHouseTax.getSingleResult();
-
-        Query getCustomerDiscount = session.createQuery("SELECT C_DISCOUNT FROM Customer WHERE C_ID = : c_id");
-        getCustomerDiscount.setParameter("c_id", C_ID);
-        double c_discount = (double) getCustomerDiscount.getSingleResult();
 
         totalAmount = totalAmount * (1 + d_tax + w_tax) * (1 - c_discount);
         framework.commitTransaction(transaction);
@@ -122,11 +114,37 @@ public class TransactionOne {
         return 1;
     }
 
+    public void sampletest(){
+        int W_ID = 1;
+        int D_ID = 1;
+        int C_ID = 1279;
+        Framework framework = Framework.getInstance();
+        Session session = framework.getSession();
+        Transaction transaction = framework.startTransaction();
+
+        //Query q0 = session.createQuery("SELECT D_NEXT_O_ID, D_TAX from District where D_W_ID = :warehouseId and D_ID = :districtId");
+        Query q0 = session.createNativeQuery("SELECT D_NEXT_O_ID, D_TAX, W_TAX, C_DISCOUNT from district, warehouse, customer where D_ID = :d_id and D_W_ID = :w_id and W_ID = :w_id and C_ID = :c_id and C_W_ID = :w_id and C_D_ID = :d_id");
+        q0.setParameter("d_id", D_ID);
+        q0.setParameter("w_id", W_ID);
+        q0.setParameter("c_id", C_ID);
+        Object[] districtList = (Object[]) q0.getSingleResult();
+        int N = (int) districtList[0];
+        double d_tax = (double) districtList[1];
+        double w_tax = (double) districtList[2];
+        double c_discount = (double) districtList[3];
+
+        System.out.println(N + " " + d_tax + " " + w_tax + " " + c_discount);
+
+        session.flush();
+        framework.commitTransaction(transaction);
+    }
+
     public static void main(String args[]) {
         TransactionOne t1 = new TransactionOne();
         Framework framework = Framework.getInstance();
         framework.initHibernate(); // Initializing Hibernate
         //t1.transaction1(1279, 1, 1, 15);
+        t1.sampletest();
 
         framework.destroy(); // Graceful shutdown of Hibernate
     }

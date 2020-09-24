@@ -1,0 +1,147 @@
+I200924 04:45:04.231957 1 util/log/sync_buffer.go:70  [config] file created at: 2020/09/24 04:45:04
+I200924 04:45:04.231957 1 util/log/sync_buffer.go:70  [config] running on machine: Sudeeps-MacBook-Pro
+I200924 04:45:04.231957 1 util/log/sync_buffer.go:70  [config] binary: CockroachDB CCL v20.1.5 (x86_64-apple-darwin14, built 2020/08/24 19:48:13, go1.13.9)
+I200924 04:45:04.231957 1 util/log/sync_buffer.go:70  [config] arguments: [cockroach start-single-node --insecure]
+I200924 04:45:04.231957 1 util/log/sync_buffer.go:70  line format: [IWEF]yymmdd hh:mm:ss.uuuuuu goid file:line msg utf8=✓
+I200924 04:45:04.231956 1 cli/start.go:1223  logging to directory /Users/sudeepkrishna/inventory-management-project/INVENTORY_COCKROACHDB/cockroach-data/logs
+W200924 04:45:04.233888 1 cli/start.go:1272  RUNNING IN INSECURE MODE!
+
+- Your cluster is open for any client that can access <all your IP addresses>.
+- Any user, even root, can log in without providing a password.
+- Any user, connecting as root, can read or write any data in your cluster.
+- There is no network encryption nor authentication, and thus no confidentiality.
+
+Check out how to secure your cluster: https://www.cockroachlabs.com/docs/v20.1/secure-a-cluster.html
+W200924 04:45:04.234501 1 cli/start.go:1144  Using the default setting for --cache (128 MiB).
+  A significantly larger value is usually needed for good performance.
+  If you have a dedicated server a reasonable setting is --cache=.25 (2.0 GiB).
+I200924 04:45:04.234523 1 cli/start.go:1286  CockroachDB CCL v20.1.5 (x86_64-apple-darwin14, built 2020/08/24 19:48:13, go1.13.9)
+I200924 04:45:04.241292 1 server/config.go:404  system total memory: 8.0 GiB
+I200924 04:45:04.241645 1 server/config.go:406  server configuration:
+max offset             500000000
+cache size             128 MiB
+SQL memory pool size   2.0 GiB
+scan interval          10m0s
+scan min idle time     10ms
+scan max idle time     1s
+event log enabled      true
+I200924 04:45:04.241725 1 cli/start.go:1129  process identity: uid 501 euid 501 gid 20 egid 20
+I200924 04:45:04.242680 1 cli/start.go:697  starting cockroach node
+I200924 04:45:04.449639 15 storage/rocksdb.go:606  opening rocksdb instance at "/Users/sudeepkrishna/inventory-management-project/INVENTORY_COCKROACHDB/cockroach-data/cockroach-temp815632733"
+I200924 04:45:04.523185 15 server/server.go:1066  [n?] monitoring forward clock jumps based on server.clock.forward_jump_check_enabled
+W200924 04:45:04.530264 15 server/config_unix.go:112  soft open file descriptor limit 10240 is under the recommended limit 15000; this may decrease performance
+please see https://www.cockroachlabs.com/docs/v20.1/recommended-production-settings.html for more details
+I200924 04:45:04.530327 15 storage/rocksdb.go:606  opening rocksdb instance at "/Users/sudeepkrishna/inventory-management-project/INVENTORY_COCKROACHDB/cockroach-data"
+I200924 04:45:04.761134 15 server/config.go:578  [n?] 1 storage engine initialized
+I200924 04:45:04.761141 15 server/config.go:581  [n?] RocksDB cache size: 128 MiB
+I200924 04:45:04.761145 15 server/config.go:581  [n?] store 0: RocksDB, max size 0 B, max open file limit 9984
+W200924 04:45:04.765254 15 cli/start.go:1068  neither --listen-addr nor --advertise-addr was specified.
+The server will advertise "Sudeeps-MacBook-Pro.local" to other nodes, is this routable?
+
+Consider using:
+- for local-only servers:  --listen-addr=localhost
+- for multi-node clusters: --advertise-addr=<host/IP addr>
+I200924 04:45:04.787897 15 server/server.go:1112  [n?] Sleeping till wall time 1600922704787316000 to catches up to 1600922705022881001 to ensure monotonicity. Delta: 235.565001ms
+I200924 04:45:05.030012 15 gossip/gossip.go:395  [n1] NodeDescriptor set to node_id:1 address:<network_field:"tcp" address_field:"Sudeeps-MacBook-Pro.local:26257" > attrs:<> locality:<> ServerVersion:<major_val:20 minor_val:1 patch:0 unstable:0 > build_tag:"v20.1.5" started_at:1600922705024677000 cluster_name:"" sql_address:<network_field:"tcp" address_field:"Sudeeps-MacBook-Pro.local:26257" > 
+W200924 04:45:05.070229 15 kv/kvserver/replica_range_lease.go:554  can't determine lease status due to node liveness error: node not in the liveness table
+github.com/cockroachdb/cockroach/pkg/kv/kvserver.init
+	/go/src/github.com/cockroachdb/cockroach/pkg/kv/kvserver/node_liveness.go:44
+runtime.doInit
+	/usr/local/go/src/runtime/proc.go:5222
+runtime.doInit
+	/usr/local/go/src/runtime/proc.go:5217
+runtime.doInit
+	/usr/local/go/src/runtime/proc.go:5217
+runtime.doInit
+	/usr/local/go/src/runtime/proc.go:5217
+runtime.main
+	/usr/local/go/src/runtime/proc.go:190
+runtime.goexit
+	/usr/local/go/src/runtime/asm_amd64.s:1357
+I200924 04:45:05.070409 15 server/node.go:428  [n1] initialized store [n1,s1]: disk (capacity=234 GiB, available=117 GiB, used=872 KiB, logicalBytes=2.6 MiB), ranges=53, leases=0, queries=0.00, writes=0.00, bytesPerReplica={p10=0.00 p25=0.00 p50=0.00 p75=705.00 p90=17078.00 pMax=2362822.00}, writesPerReplica={p10=0.00 p25=0.00 p50=0.00 p75=0.00 p90=0.00 pMax=0.00}
+I200924 04:45:05.070551 15 kv/kvserver/stores.go:247  [n1] read 0 node addresses from persistent storage
+I200924 04:45:05.070966 15 server/node.go:649  [n1] connecting to gossip network to verify cluster ID...
+I200924 04:45:05.070990 15 server/node.go:669  [n1] node connected via gossip and verified as part of cluster "8022429f-0c34-48fd-b325-881edc1711bf"
+I200924 04:45:05.071058 15 server/node.go:512  [n1] node=1: started with [<no-attributes>=/Users/sudeepkrishna/inventory-management-project/INVENTORY_COCKROACHDB/cockroach-data] engine(s) and attributes []
+W200924 04:45:05.071570 224 kv/kvserver/store.go:1631  [n1,s1,r6/1:/Table/{SystemCon…-11}] could not gossip system config: [NotLeaseHolderError] r6: replica (n1,s1):1 not lease holder; lease holder unknown
+I200924 04:45:05.073152 15 server/server.go:1630  [n1] starting http server at [::]:8080 (use: Sudeeps-MacBook-Pro.local:8080)
+I200924 04:45:05.073179 15 server/server.go:1637  [n1] starting grpc/postgres server at [::]:26257
+I200924 04:45:05.073192 15 server/server.go:1638  [n1] advertising CockroachDB node at Sudeeps-MacBook-Pro.local:26257
+I200924 04:45:05.074920 236 sql/temporary_schema.go:452  [n1] skipping temporary object cleanup run as it is not the leaseholder
+I200924 04:45:05.075136 236 sql/temporary_schema.go:453  [n1] completed temporary object cleanup job
+I200924 04:45:05.075156 236 sql/temporary_schema.go:575  [n1] temporary object cleaner next scheduled to run at 2020-09-24 05:15:05.071476 +0000 UTC
+I200924 04:45:05.135684 261 kv/kvserver/node_liveness.go:478  [n1,liveness-hb] heartbeat failed on epoch increment; retrying
+I200924 04:45:05.142915 15 server/server.go:1798  [n1] done ensuring all necessary migrations have run
+I200924 04:45:05.142954 15 server/server.go:2040  [n1] serving sql connections
+I200924 04:45:05.143523 15 cli/start.go:857  [config] clusterID: 8022429f-0c34-48fd-b325-881edc1711bf
+I200924 04:45:05.143589 15 cli/start.go:866  node startup completed:
+CockroachDB node starting at 2020-09-24 04:45:05.14337 +0000 UTC (took 0.9s)
+build:               CCL v20.1.5 @ 2020/08/24 19:48:13 (go1.13.9)
+webui:               http://Sudeeps-MacBook-Pro.local:8080
+sql:                 postgresql://root@Sudeeps-MacBook-Pro.local:26257?sslmode=disable
+RPC client flags:    cockroach <client cmd> --host=Sudeeps-MacBook-Pro.local:26257 --insecure
+logs:                /Users/sudeepkrishna/inventory-management-project/INVENTORY_COCKROACHDB/cockroach-data/logs
+temp dir:            /Users/sudeepkrishna/inventory-management-project/INVENTORY_COCKROACHDB/cockroach-data/cockroach-temp815632733
+external I/O path:   /Users/sudeepkrishna/inventory-management-project/INVENTORY_COCKROACHDB/cockroach-data/extern
+store[0]:            path=/Users/sudeepkrishna/inventory-management-project/INVENTORY_COCKROACHDB/cockroach-data
+storage engine:      rocksdb
+status:              restarted pre-existing node
+clusterID:           8022429f-0c34-48fd-b325-881edc1711bf
+nodeID:              1
+I200924 04:45:05.144619 277 sqlmigrations/migrations.go:668  [n1] starting wait for upgrade finalization before schema change job migration
+I200924 04:45:05.160424 275 server/server_update.go:55  [n1] no need to upgrade, cluster already at the newest version
+I200924 04:45:05.161959 278 sql/event_log.go:132  [n1] Event: "node_restart", target: 1, info: {Descriptor:{NodeID:1 Address:Sudeeps-MacBook-Pro.local:26257 Attrs: Locality: ServerVersion:20.1 BuildTag:v20.1.5 StartedAt:1600922705024677000 LocalityAddress:[] ClusterName: SQLAddress:Sudeeps-MacBook-Pro.local:26257} ClusterID:8022429f-0c34-48fd-b325-881edc1711bf StartedAt:1600922705024677000 LastUp:1600848782465163000}
+I200924 04:45:05.166002 436 sql/lease.go:1971  released orphaned table lease: {id:23 version:1 expiration:{Time:{wall:626541000 ext:63736445784 loc:<nil>}}}
+I200924 04:45:05.166010 435 sql/lease.go:1971  released orphaned table lease: {id:2 version:1 expiration:{Time:{wall:680179000 ext:63736445790 loc:<nil>}}}
+I200924 04:45:05.166021 438 sql/lease.go:1971  released orphaned table lease: {id:61 version:3 expiration:{Time:{wall:599483000 ext:63736445765 loc:<nil>}}}
+I200924 04:45:05.166016 439 sql/lease.go:1971  released orphaned table lease: {id:62 version:3 expiration:{Time:{wall:701257000 ext:63736445782 loc:<nil>}}}
+I200924 04:45:05.166569 437 sql/lease.go:1971  released orphaned table lease: {id:60 version:3 expiration:{Time:{wall:797824000 ext:63736445780 loc:<nil>}}}
+I200924 04:45:05.167635 373 kv/kvserver/replica_command.go:663  [n1,merge,s1,r48/1:/Table/61{-/1}] initiating a merge of r55:/Table/6{1/1-2} [(n1,s1):1, next=2, gen=12, sticky=1600852143.920087000,0] into this range (lhs+rhs has (size=0 B+0 B=0 B qps=0.00+0.00=0.00qps) below threshold (size=128 MiB, qps=1250.00))
+I200924 04:45:05.209478 277 sqlmigrations/migrations.go:694  [n1] schema change job migration already complete
+I200924 04:45:05.220007 468 sql/lease.go:1971  released orphaned table lease: {id:66 version:3 expiration:{Time:{wall:786407000 ext:63736445777 loc:<nil>}}}
+I200924 04:45:05.220159 466 sql/lease.go:1971  released orphaned table lease: {id:64 version:3 expiration:{Time:{wall:388261000 ext:63736445788 loc:<nil>}}}
+I200924 04:45:05.220163 467 sql/lease.go:1971  released orphaned table lease: {id:65 version:3 expiration:{Time:{wall:114769000 ext:63736445792 loc:<nil>}}}
+I200924 04:45:05.220174 305 sql/lease.go:1971  released orphaned table lease: {id:63 version:3 expiration:{Time:{wall:85367000 ext:63736445770 loc:<nil>}}}
+I200924 04:45:05.223958 206 kv/kvserver/store_remove_replica.go:122  [n1,s1,r48/1:/Table/61{-/1}] removing replica r55/1
+I200924 04:45:05.226588 476 kv/kvserver/replica_command.go:663  [n1,merge,s1,r52/1:/Table/65{-/1}] initiating a merge of r60:/Table/6{5/1-6} [(n1,s1):1, next=2, gen=16, sticky=1600852144.161875000,0] into this range (lhs+rhs has (size=0 B+0 B=0 B qps=0.00+0.00=0.00qps) below threshold (size=128 MiB, qps=1250.00))
+I200924 04:45:05.229707 212 kv/kvserver/store_remove_replica.go:122  [n1,s1,r52/1:/Table/65{-/1}] removing replica r60/1
+I200924 04:45:06.232336 517 kv/kvserver/replica_command.go:663  [n1,merge,s1,r50/1:/Table/63{-/1}] initiating a merge of r59:/Table/6{3/1-4} [(n1,s1):1, next=2, gen=14, sticky=1600852144.114691000,0] into this range (lhs+rhs has (size=0 B+0 B=0 B qps=0.93+0.93=1.85qps) below threshold (size=128 MiB, qps=1250.00))
+I200924 04:45:06.237972 189 kv/kvserver/store_remove_replica.go:122  [n1,s1,r50/1:/Table/63{-/1}] removing replica r59/1
+I200924 04:45:06.641535 156 gossip/gossip.go:1527  [n1] node has connected to cluster via gossip
+I200924 04:45:06.641884 156 kv/kvserver/stores.go:266  [n1] wrote 0 node addresses to persistent storage
+I200924 04:45:07.236711 596 kv/kvserver/replica_command.go:663  [n1,merge,s1,r49/1:/Table/62{-/1}] initiating a merge of r57:/Table/6{2/1-3} [(n1,s1):1, next=2, gen=13, sticky=1600852144.030825000,0] into this range (lhs+rhs has (size=0 B+0 B=0 B qps=0.00+0.00=0.00qps) below threshold (size=128 MiB, qps=1250.00))
+I200924 04:45:07.244184 175 kv/kvserver/store_remove_replica.go:122  [n1,s1,r49/1:/Table/62{-/1}] removing replica r57/1
+I200924 04:45:08.234833 582 kv/kvserver/replica_command.go:663  [n1,merge,s1,r53/1:/Table/66{-/1}] initiating a merge of r54:/{Table/66/1-Max} [(n1,s1):1, next=2, gen=16, sticky=1600852143.874564000,0] into this range (lhs+rhs has (size=0 B+0 B=0 B qps=0.00+0.00=0.00qps) below threshold (size=128 MiB, qps=1250.00))
+I200924 04:45:08.238057 47 kv/kvserver/store_remove_replica.go:122  [n1,s1,r53/1:/Table/66{-/1}] removing replica r54/1
+I200924 04:45:09.243619 694 kv/kvserver/replica_command.go:663  [n1,merge,s1,r51/1:/Table/64{-/1}] initiating a merge of r58:/Table/6{4/1-5} [(n1,s1):1, next=2, gen=15, sticky=1600852144.071432000,0] into this range (lhs+rhs has (size=0 B+0 B=0 B qps=0.00+0.00=0.00qps) below threshold (size=128 MiB, qps=1250.00))
+I200924 04:45:09.251388 48 kv/kvserver/store_remove_replica.go:122  [n1,s1,r51/1:/Table/64{-/1}] removing replica r58/1
+I200924 04:45:10.244832 744 kv/kvserver/replica_command.go:663  [n1,merge,s1,r47/1:/Table/60{-/1}] initiating a merge of r56:/Table/6{0/1-1} [(n1,s1):1, next=2, gen=11, sticky=1600852143.972351000,0] into this range (lhs+rhs has (size=0 B+0 B=0 B qps=0.00+0.00=0.00qps) below threshold (size=128 MiB, qps=1250.00))
+I200924 04:45:10.250279 217 kv/kvserver/store_remove_replica.go:122  [n1,s1,r47/1:/Table/60{-/1}] removing replica r56/1
+W200924 04:45:15.076256 238 server/status/runtime.go:420  [n1] unable to get file descriptor usage (will not try again): not implemented on darwin
+I200924 04:45:15.091420 238 server/status/runtime.go:498  [n1] runtime stats: 75 MiB RSS, 181 goroutines, 66 MiB/55 MiB/82 MiB GO alloc/idle/total, 20 MiB/30 MiB CGO alloc/total, 0.0 CGO/sec, 0.0/0.0 %(u/s)time, 0.0 %gc (9x), 27 KiB/46 KiB (r/w)net
+I200924 04:45:25.075254 232 kv/kvserver/store.go:2474  [n1,s1] sstables (read amplification = 1):
+0 [ 296K 1 ]: 296K
+I200924 04:45:25.081287 232 kv/kvserver/store.go:2475  [n1,s1] 
+** Compaction Stats [default] **
+Level    Files   Size     Score Read(GB)  Rn(GB) Rnp1(GB) Write(GB) Wnew(GB) Moved(GB) W-Amp Rd(MB/s) Wr(MB/s) Comp(sec) CompMergeCPU(sec) Comp(cnt) Avg(sec) KeyIn KeyDrop
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  L0      1/0   296.31 KB   0.5      0.0     0.0      0.0       0.0      0.0       0.0   1.8      2.7      4.9      0.13              0.00         2    0.065    7970   3896
+ Sum      1/0   296.31 KB   0.0      0.0     0.0      0.0       0.0      0.0       0.0   1.8      2.7      4.9      0.13              0.00         2    0.065    7970   3896
+ Int      0/0    0.00 KB   0.0      0.0     0.0      0.0       0.0      0.0       0.0   1.8      2.7      4.9      0.13              0.00         2    0.065    7970   3896
+
+** Compaction Stats [default] **
+Priority    Files   Size     Score Read(GB)  Rn(GB) Rnp1(GB) Write(GB) Wnew(GB) Moved(GB) W-Amp Rd(MB/s) Wr(MB/s) Comp(sec) CompMergeCPU(sec) Comp(cnt) Avg(sec) KeyIn KeyDrop
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Low      0/0    0.00 KB   0.0      0.0     0.0      0.0       0.0     -0.0       0.0   0.0     16.0     13.4      0.02              0.00         1    0.022    7970   3896
+User      0/0    0.00 KB   0.0      0.0     0.0      0.0       0.0      0.0       0.0   0.0      0.0      3.2      0.11              0.00         1    0.108       0      0
+Uptime(secs): 20.5 total, 20.5 interval
+Flush(GB): cumulative 0.000, interval 0.000
+AddFile(GB): cumulative 0.000, interval 0.000
+AddFile(Total Files): cumulative 0, interval 0
+AddFile(L0 Files): cumulative 0, interval 0
+AddFile(Keys): cumulative 0, interval 0
+Cumulative compaction: 0.00 GB write, 0.03 MB/s write, 0.00 GB read, 0.02 MB/s read, 0.1 seconds
+Interval compaction: 0.00 GB write, 0.03 MB/s write, 0.00 GB read, 0.02 MB/s read, 0.1 seconds
+Stalls(count): 0 level0_slowdown, 0 level0_slowdown_with_compaction, 0 level0_numfiles, 0 level0_numfiles_with_compaction, 0 stop for pending_compaction_bytes, 0 slowdown for pending_compaction_bytes, 0 memtable_compaction, 0 memtable_slowdown, interval 0 total count
+estimated_pending_compaction_bytes: 0 B
+I200924 04:45:25.086630 238 server/status/runtime.go:498  [n1] runtime stats: 83 MiB RSS, 181 goroutines, 75 MiB/46 MiB/90 MiB GO alloc/idle/total, 20 MiB/31 MiB CGO alloc/total, 37.1 CGO/sec, 1.2/0.8 %(u/s)time, 0.0 %gc (0x), 5.3 KiB/15 KiB (r/w)net
