@@ -1,0 +1,1 @@
+/Users/sudeepkrishna/inventory-management-project/INVENTORY_COCKROACHDB/cockroach-data/cockroach-temp583879273
