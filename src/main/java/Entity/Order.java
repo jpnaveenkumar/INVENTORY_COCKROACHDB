@@ -2,37 +2,29 @@ package Entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 class OrderId implements Serializable
 {
-    public Integer getO_W_ID() {
-        return O_W_ID;
-    }
-
-    public void setO_W_ID(Integer o_W_ID) {
-        O_W_ID = o_W_ID;
-    }
-
-    public Integer getO_D_ID() {
-        return O_D_ID;
-    }
-
-    public void setO_D_ID(Integer o_D_ID) {
-        O_D_ID = o_D_ID;
-    }
-
-    public Integer getO_ID() {
-        return O_ID;
-    }
-
-    public void setO_ID(Integer o_ID) {
-        O_ID = o_ID;
-    }
-
     Integer O_W_ID;
     Integer O_D_ID;
     Integer O_ID;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderId orderId = (OrderId) o;
+        return O_W_ID.equals(orderId.O_W_ID) &&
+                O_D_ID.equals(orderId.O_D_ID) &&
+                O_ID.equals(orderId.O_ID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(O_W_ID, O_D_ID, O_ID);
+    }
 }
 
 @Entity
@@ -40,6 +32,12 @@ class OrderId implements Serializable
 public class Order {
     @EmbeddedId
     OrderId orderId;
+
+    Integer O_C_ID;
+    String O_CARRIER_ID;
+    Double O_OL_CNT;
+    Double O_ALL_LOCAL;
+    String O_ENTRY_D;
 
     public void setOrderId(Integer O_W_ID, Integer O_D_ID, Integer O_ID) {
         this.orderId.O_W_ID = O_W_ID;
@@ -87,9 +85,4 @@ public class Order {
         O_ENTRY_D = o_ENTRY_D;
     }
 
-    Integer O_C_ID;
-    String O_CARRIER_ID;
-    Double O_OL_CNT;
-    Double O_ALL_LOCAL;
-    String O_ENTRY_D;
 }

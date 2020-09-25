@@ -1,13 +1,14 @@
 package Transaction;
 
-import Entity.Order;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.time.Duration;
+import java.time.Instant;
 
 public class TransactionOne {
 
@@ -227,7 +228,6 @@ public class TransactionOne {
             System.out.println("OL_AMOUNT: " + itemOutput.OL_AMOUNT);
             System.out.println("S_QUANTITY: " + itemOutput.S_QUANTITY);
         }
-        System.out.println("-------------DONE-------------");
     }
 
     private List<T1Input> createTestInput(){
@@ -246,13 +246,19 @@ public class TransactionOne {
     }
 
     public static void main(String args[]) {
+
         TransactionOne t1 = new TransactionOne();
         Framework framework = Framework.getInstance();
         framework.initHibernate(); // Initializing Hibernate
 
         List<T1Input> list = t1.createTestInput();
-        T1Output output = t1.transaction1(1300, 2, 2, 10, list);
+        Instant start = Instant.now();  //calculating start time
+        T1Output output = t1.transaction1(1300, 5, 5, 10, list);
+        Instant end = Instant.now();    //calculating end time
+        Duration timeElapsed = Duration.between(start, end);
         t1.printOutput(output);
+        System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
+        System.out.println("-------------DONE-------------");
         //t1.test();
 
         framework.destroy(); // Graceful shutdown of Hibernate

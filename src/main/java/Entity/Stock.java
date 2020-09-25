@@ -5,12 +5,27 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 class StockId implements Serializable
 {
     Integer S_W_ID;
     Integer S_I_ID;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StockId stockId = (StockId) o;
+        return S_W_ID.equals(stockId.S_W_ID) &&
+                S_I_ID.equals(stockId.S_I_ID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(S_W_ID, S_I_ID);
+    }
 }
 
 @Entity
