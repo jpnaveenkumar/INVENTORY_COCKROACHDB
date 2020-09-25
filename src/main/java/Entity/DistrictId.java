@@ -2,11 +2,26 @@ package Entity;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Embeddable
 public class DistrictId implements Serializable {
     Integer D_ID;
     Integer D_W_ID;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DistrictId that = (DistrictId) o;
+        return D_ID.equals(that.D_ID) &&
+                D_W_ID.equals(that.D_W_ID);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(D_ID, D_W_ID);
+    }
 
     public DistrictId(Integer d_ID, Integer d_W_ID){
         this.D_ID = d_ID;
