@@ -11,8 +11,8 @@ import java.time.Duration;
 import java.time.Instant;
 
 public class TransactionOne {
-
-    private T1Output transaction1(int C_ID, int W_ID, int D_ID, int num_items, List<T1Input> inputList){
+    int queryCount = 0;
+    private T1Output transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<T1Input> inputList){
 
         //Note : Numbers or alphabet comments above a sequence of code lines indicate which part of problem statement it is related to. Refer section 2.1, Processing steps in project document.
 
@@ -35,12 +35,14 @@ public class TransactionOne {
         double c_discount = (double) districtList[3];
         t1Output.C_LAST = (String) districtList[4];
         t1Output.C_CREDIT = (String) districtList[5];
+        queryCount++;
 
         //2
         Query q1 = session.createQuery("UPDATE District SET D_NEXT_O_ID = D_NEXT_O_ID - 1 WHERE D_W_ID = :warehouseId AND D_ID = :districtId");
         q1.setParameter("warehouseId", W_ID);
         q1.setParameter("districtId", D_ID);
         q1.executeUpdate();
+        queryCount++;
 
         //3
         int allLocal = checkAllLocal(inputList, W_ID);
@@ -56,6 +58,7 @@ public class TransactionOne {
         q2.setParameter(7, allLocal); //should change
         q2.setParameter(8, o_entry_d);
         q2.executeUpdate();
+        queryCount++;
 
         //4
         double totalAmount = 0.0;
@@ -71,6 +74,7 @@ public class TransactionOne {
         }
         Query getStockQuantity = session.createNativeQuery(new String(getStockQuantityBuilder));
         List<Double> stockQuantityList = getStockQuantity.getResultList();
+        queryCount++;
 
         //5 (g)
         StringBuilder insertOrderLineQueryBuilder = new StringBuilder("INSERT INTO OrderLine(OL_O_ID, OL_D_ID, OL_W_ID, OL_NUMBER, OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DELIVERY_D, OL_DIST_INFO) VALUES ");
@@ -86,6 +90,7 @@ public class TransactionOne {
 
         Query getItemPrice = session.createQuery(new String(getItemPriceQueryBuilder));
         List<Object[]> itemDataList = getItemPrice.getResultList();
+        queryCount++;
         List<Double> itemPriceList = new ArrayList<>();
         List<String> itemNameList = new ArrayList<>();
         for(Object[] o : itemDataList){
@@ -118,6 +123,7 @@ public class TransactionOne {
             updateStock.setParameter("w_id", supplierWarehouseNumber);
             updateStock.setParameter("i_id", itemNumber);
             updateStock.executeUpdate();
+            queryCount++;
 
             //e
             double itemAmount = quantity * itemPriceList.get(i);
@@ -146,6 +152,7 @@ public class TransactionOne {
         String orderLineString = new String(insertOrderLineQueryBuilder);
         Query orderLineQuery = session.createNativeQuery(orderLineString);
         orderLineQuery.executeUpdate();
+        queryCount++;
 
         //6
         totalAmount = totalAmount * (1 + d_tax + w_tax) * (1 - c_discount);
@@ -253,11 +260,12 @@ public class TransactionOne {
 
         List<T1Input> list = t1.createTestInput();
         Instant start = Instant.now();  //calculating start time
-        T1Output output = t1.transaction1(1300, 5, 5, 10, list);
+        T1Output output = t1.transactionOne(1300, 5, 5, 10, list);
         Instant end = Instant.now();    //calculating end time
         Duration timeElapsed = Duration.between(start, end);
         t1.printOutput(output);
         System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
+        System.out.println("Total queries to database : " + t1.queryCount);
         System.out.println("-------------DONE-------------");
         //t1.test();
 
