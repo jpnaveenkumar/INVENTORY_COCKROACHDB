@@ -1,5 +1,3 @@
-package Driver;
-
 import Transaction.Framework;
 import org.hibernate.Session;
 import org.hibernate.Transaction;

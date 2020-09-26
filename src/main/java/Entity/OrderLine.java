@@ -2,32 +2,6 @@ package Entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Objects;
-
-@Embeddable
-class OrderLineId implements Serializable
-{
-    Integer OL_W_ID;
-    Integer OL_D_ID;
-    Integer OL_O_ID;
-    Integer OL_NUMBER;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        OrderLineId that = (OrderLineId) o;
-        return OL_W_ID.equals(that.OL_W_ID) &&
-                OL_D_ID.equals(that.OL_D_ID) &&
-                OL_O_ID.equals(that.OL_O_ID) &&
-                OL_NUMBER.equals(that.OL_NUMBER);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(OL_W_ID, OL_D_ID, OL_O_ID, OL_NUMBER);
-    }
-}
 
 @Entity
 @Table(name = "orderline")
@@ -40,4 +14,60 @@ public class OrderLine {
     Integer OL_SUPPLY_W_ID;
     Double OL_QUANTITY;
     String OL_DIST_INFO;
+
+    public OrderLineId getOrderLineId() {
+        return orderLineId;
+    }
+
+    public void setOrderLineId(OrderLineId orderLineId) {
+        this.orderLineId = orderLineId;
+    }
+
+    public Integer getOL_I_ID() {
+        return OL_I_ID;
+    }
+
+    public void setOL_I_ID(Integer OL_I_ID) {
+        this.OL_I_ID = OL_I_ID;
+    }
+
+    public String getOL_DELIVERY_D() {
+        return OL_DELIVERY_D;
+    }
+
+    public void setOL_DELIVERY_D(String OL_DELIVERY_D) {
+        this.OL_DELIVERY_D = OL_DELIVERY_D;
+    }
+
+    public Double getOL_AMOUNT() {
+        return OL_AMOUNT;
+    }
+
+    public void setOL_AMOUNT(Double OL_AMOUNT) {
+        this.OL_AMOUNT = OL_AMOUNT;
+    }
+
+    public Integer getOL_SUPPLY_W_ID() {
+        return OL_SUPPLY_W_ID;
+    }
+
+    public void setOL_SUPPLY_W_ID(Integer OL_SUPPLY_W_ID) {
+        this.OL_SUPPLY_W_ID = OL_SUPPLY_W_ID;
+    }
+
+    public Double getOL_QUANTITY() {
+        return OL_QUANTITY;
+    }
+
+    public void setOL_QUANTITY(Double OL_QUANTITY) {
+        this.OL_QUANTITY = OL_QUANTITY;
+    }
+
+    public String getOL_DIST_INFO() {
+        return OL_DIST_INFO;
+    }
+
+    public void setOL_DIST_INFO(String OL_DIST_INFO) {
+        this.OL_DIST_INFO = OL_DIST_INFO;
+    }
 }
