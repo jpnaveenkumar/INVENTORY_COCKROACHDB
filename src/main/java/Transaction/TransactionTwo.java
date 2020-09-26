@@ -76,6 +76,8 @@ public class TransactionTwo {
             t2Output.D_ZIP = (String) result3[4];
 
             t2Output.PAYMENT = PAYMENT;
+
+            framework.commitTransaction(transaction);
             return t2Output;
         }
 
