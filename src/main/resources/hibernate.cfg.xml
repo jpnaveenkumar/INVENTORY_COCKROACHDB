@@ -7,7 +7,7 @@
         <!-- Database connection settings -->
         <property name="connection.driver_class">org.postgresql.Driver</property>
         <property name="dialect">org.hibernate.dialect.CockroachDB201Dialect</property>
-        <property name="connection.url">jdbc:postgresql://localhost:26257/test?sslmode=disable</property>
+        <property name="connection.url">jdbc:postgresql://xcnc41.comp.nus.edu.sg:30000/test?sslmode=disable</property>
         <property name="connection.username">root</property>
         <property name="connection.password"></property>
 

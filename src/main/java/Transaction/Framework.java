@@ -47,6 +47,7 @@ public class Framework {
                 .addAnnotatedClass(Order.class)
                 .addAnnotatedClass(OrderLine.class)
                 .addAnnotatedClass(Stock.class)
+                .addAnnotatedClass(ItemByCustomer.class)
                 .buildSessionFactory();
         session = sessionFactory.openSession();
     }
