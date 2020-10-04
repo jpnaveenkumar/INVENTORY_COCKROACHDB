@@ -2,6 +2,7 @@ package Entity;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.HashMap;
 
 @Entity
 @Table(name = "orders")
@@ -13,6 +14,36 @@ public class Order {
     Double O_OL_CNT;
     Double O_ALL_LOCAL;
     String O_ENTRY_D;
+    @Transient
+    HashMap<Integer, Item> popularItems;
+    @Transient
+    Customer orderedCustomer;
+    @Transient
+    Double maximumQuantityOrdered;
+
+    public HashMap<Integer, Item> getPopularItems() {
+        return popularItems;
+    }
+
+    public void setPopularItems(HashMap<Integer, Item> popularItems) {
+        this.popularItems = popularItems;
+    }
+
+    public Customer getOrderedCustomer() {
+        return orderedCustomer;
+    }
+
+    public void setOrderedCustomer(Customer orderedCustomer) {
+        this.orderedCustomer = orderedCustomer;
+    }
+
+    public Double getMaximumQuantityOrdered() {
+        return maximumQuantityOrdered;
+    }
+
+    public void setMaximumQuantityOrdered(Double maximumQuantityOrdered) {
+        this.maximumQuantityOrdered = maximumQuantityOrdered;
+    }
 
     public OrderId getOrderId() {
         return orderId;
