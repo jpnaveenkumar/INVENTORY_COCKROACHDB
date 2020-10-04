@@ -49,6 +49,8 @@ public class Driver {
 //        stockLevelTransaction.performStockLevelTransaction();
 //          PopularItemTransaction popularItemTransaction = new PopularItemTransaction(1, 1, 11);
 //          popularItemTransaction.findPopulartItemsInLastLOrders();
+//        RelatedCustomerTransaction relatedCustomerTransaction = new RelatedCustomerTransaction(1,1,1);
+//        relatedCustomerTransaction.findRelatedCustomers();
 
         framework.destroy(); // Graceful shutdown of Hibernate
     }
