@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.Date;
 
 public class TransactionTwo {
-        T2Output transactionTwo(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT){
+        public T2Output transactionTwo(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT){
             T2Output t2Output = new T2Output();
             Framework framework = Framework.getInstance();
             Session session = framework.getSession();
@@ -81,7 +81,7 @@ public class TransactionTwo {
             return t2Output;
         }
 
-    private void printOutput(T2Output output){
+    public void printOutput(T2Output output){
         System.out.println("-------------Transaction 2 has ended; Showing outputs below-------------");
         System.out.println("C_W_ID: " + output.C_W_ID);
         System.out.println("C_D_ID: " + output.C_D_ID);
