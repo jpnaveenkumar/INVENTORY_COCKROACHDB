@@ -10,11 +10,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class TransactionThree {
-    public void transactionThree(int W_ID, int CARRIER_ID){
-        Framework framework = Framework.getInstance();
-        Session session = framework.getSession();
-        Transaction transaction = framework.startTransaction();
+public class DeliveryTransaction {
+    Framework framework;
+    Session session;
+
+    public DeliveryTransaction(){
+        this.framework = Framework.getInstance();
+        this.session = this.framework.getSession();
+    }
+
+    public void processDeliveryTransaction(int W_ID, int CARRIER_ID){
+        System.out.println("-------------Delivery transaction-------------");
+        Instant start = Instant.now();
+
+        Transaction transaction = this.framework.startTransaction();
 
         List<Integer> smallestOrderNumber = new ArrayList<>();
         List<Integer> customerOfSmallestOrderNumber = new ArrayList<>();
@@ -58,13 +67,7 @@ public class TransactionThree {
             Query updateOrderLines = session.createNativeQuery(String.format("UPDATE orderline SET ol_delivery_d = %s WHERE ol_o_id = %d AND ol_d_id = %d AND ol_w_id = %d", "'" + dateTime + "'", o_id, i, W_ID));
             updateOrderLines.executeUpdate();
 
-            //d
-//            Query getSumOfOrderLineAmount = session.createNativeQuery(String.format("select sum(ol_amount) from orderline where ol_w_id = :ol_w_id and ol_d_id = :ol_d_id and ol_o_id = :ol_o_id");
-//            getSumOfOrderLineAmount.setParameter("ol_w_id", W_ID);
-//            getSumOfOrderLineAmount.setParameter("ol_d_id", i);
-//            getSumOfOrderLineAmount.setParameter("ol_o_id", o_id);
-
-            //update customer
+            //d update customer
             Query updateCustomer = session.createNativeQuery("update customer set c_balance = c_balance + :b, c_delivery_cnt = c_delivery_cnt + 1 where c_w_id = :w_id and c_d_id = :i and c_id = :c_id");
             updateCustomer.setParameter("b", sumOfOrderLineAmountList.get(i-1));
             updateCustomer.setParameter("w_id", W_ID);
@@ -73,22 +76,23 @@ public class TransactionThree {
             updateCustomer.executeUpdate();
         }
         framework.commitTransaction(transaction);
+
+        Instant end = Instant.now();    //calculating end time
+        Duration timeElapsed = Duration.between(start, end);
+        System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
     }
 
-
-
     public static void main(String[] args){
-        Framework framework = Framework.getInstance();
-        framework.initHibernate(); // Initializing Hibernate
-        TransactionThree t3 = new TransactionThree();
+        DeliveryTransaction t3 = new DeliveryTransaction();
+        t3.framework.initHibernate();
         Instant start = Instant.now();
-        t3.transactionThree(1, 10);
+        t3.processDeliveryTransaction(1, 10);
         Instant end = Instant.now();    //calculating end time
         Duration timeElapsed = Duration.between(start, end);
 
         System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
         System.out.println("-------------DONE-------------");
 
-        framework.destroy();
+        t3.framework.destroy();
     }
 }
