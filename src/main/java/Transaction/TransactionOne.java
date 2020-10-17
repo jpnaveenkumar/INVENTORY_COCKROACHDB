@@ -5,25 +5,20 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import java.time.Duration;
 import java.time.Instant;
 
 public class TransactionOne {
-
     int queryCount = 0;
-    Framework framework;
-    Session session;
-
-    TransactionOne(){
-        this.framework = Framework.getInstance();
-        this.session = this.framework.getSession();
-    }
-
-    private T1Output transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<T1Input> inputList){
+    public T1Output transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<T1Input> inputList){
 
         //Note : Numbers or alphabet comments above a sequence of code lines indicate which part of problem statement it is related to. Refer section 2.1, Processing steps in project document.
+
+        Framework framework = Framework.getInstance();
+        Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
 
         //List<T1Input> inputList = new ArrayList<T1Input>();
@@ -44,7 +39,7 @@ public class TransactionOne {
         queryCount++;
 
         //2
-        Query q1 = session.createQuery("UPDATE District SET D_NEXT_O_ID = D_NEXT_O_ID - 1 WHERE D_W_ID = :warehouseId AND D_ID = :districtId");
+        Query q1 = session.createQuery("UPDATE District SET D_NEXT_O_ID = D_NEXT_O_ID + 1 WHERE D_W_ID = :warehouseId AND D_ID = :districtId");
         q1.setParameter("warehouseId", W_ID);
         q1.setParameter("districtId", D_ID);
         q1.executeUpdate();
@@ -87,7 +82,7 @@ public class TransactionOne {
         StringBuilder insertOrderLineValuesQueryBuilder = new StringBuilder();
 
         //5 (e)
-        StringBuilder getItemPriceQueryBuilder = new StringBuilder("SELECT I_NAME, I_PRICE FROM Item WHERE I_ID IN (");
+        StringBuilder getItemPriceQueryBuilder = new StringBuilder("SELECT I_NAME, I_PRICE, I_ID FROM Item WHERE I_ID IN (");
         //building the query string
         for(int i=0; i<num_items; i++){
             int itemNumber = inputList.get(i).itemNumber;
@@ -96,19 +91,23 @@ public class TransactionOne {
 
         Query getItemPrice = session.createQuery(new String(getItemPriceQueryBuilder));
         List<Object[]> itemDataList = getItemPrice.getResultList();
+        System.out.println(itemDataList.size() + " === "+ num_items);
+        System.out.println(getItemPriceQueryBuilder.toString());
         queryCount++;
         List<Double> itemPriceList = new ArrayList<>();
         List<String> itemNameList = new ArrayList<>();
+        HashMap<Integer, Double> itemIdVsPrice = new HashMap<>();
+        HashMap<Integer, String> itemIdVsName = new HashMap<>();
         for(Object[] o : itemDataList){
-            itemNameList.add((String) o[0]);
-            itemPriceList.add((double) o[1]);
+            itemIdVsPrice.put((Integer)o[2], (double)o[1]);
+            itemIdVsName.put((Integer)o[2], (String)o[0]);
+            //itemNameList.add((String) o[0]);
+            //itemPriceList.add((double) o[1]);
         }
 
         //initializing output list for each item
         List<ItemOutput> itemOutputs = new ArrayList<ItemOutput>();
 
-        //inserting values into itembycustomer table
-        StringBuilder itembycustomer = new StringBuilder("Insert into item_by_customer(W_ID, D_ID, O_ID, I_ID, C_ID) values ");
         //5
         for(int i=0; i<num_items; i++){
             int itemNumber = inputList.get(i).itemNumber;
@@ -134,7 +133,7 @@ public class TransactionOne {
             queryCount++;
 
             //e
-            double itemAmount = quantity * itemPriceList.get(i);
+            double itemAmount = quantity * itemIdVsPrice.get(itemNumber);
 
             //f
             totalAmount += itemAmount;
@@ -146,15 +145,13 @@ public class TransactionOne {
             //setting output data
             ItemOutput itemOutput = new ItemOutput();
             itemOutput.ITEM_NUMBER = i + 1;
-            itemOutput.I_NAME = itemNameList.get(i);
+            itemOutput.I_NAME = itemIdVsName.get(itemNumber);
             itemOutput.SUPPLIER_WAREHOUSE = supplierWarehouseNumber;
             itemOutput.QUANTITY = quantity;
             itemOutput.OL_AMOUNT = itemAmount;
             itemOutput.S_QUANTITY = (double) adjustedQuantity;
             itemOutputs.add(itemOutput);
 
-            itembycustomer.append(String.format("(%s, %s, %s, %s, %s)", W_ID, D_ID, N, itemNumber, C_ID));
-            itembycustomer.append((i < num_items-1) ? ", " : "");
         }
 
         //5 (g) - bulk insert instead of multiple single-inserts
@@ -162,11 +159,6 @@ public class TransactionOne {
         String orderLineString = new String(insertOrderLineQueryBuilder);
         Query orderLineQuery = session.createNativeQuery(orderLineString);
         orderLineQuery.executeUpdate();
-        queryCount++;
-
-        //insert into item_by_customer table for facilitating easy transaction 8
-        Query itemByCustomerQuery = session.createNativeQuery(itembycustomer.toString());
-        itemByCustomerQuery.executeUpdate();
         queryCount++;
 
         //6
@@ -198,8 +190,36 @@ public class TransactionOne {
         return 1;
     }
 
+    //function which can be used for unit testing
+    private void test(){
+        Framework framework = Framework.getInstance();
+        Session session = framework.getSession();
+        Transaction transaction = framework.startTransaction();
 
-    private void printOutput(T1Output output){
+        int W_ID = 3;
+        int D_ID = 3;
+        int C_ID = 1281;
+        int num_items = 10;
+        int N = 3000;
+        int allLocal = 1;
+        String o_entry_d = String.valueOf(java.time.LocalTime.now());
+        String s2 = String.format("insert into Order(O_W_ID, O_D_ID, O_ID, O_C_ID, O_CARRIER_ID, O_OL_CNT, O_ALL_LOCAL, O_ENTRY_D) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)");
+        Query q2 = session.createNativeQuery(s2);
+        q2.setParameter(1, W_ID);
+        q2.setParameter(2, D_ID);
+        q2.setParameter(3, N);
+        q2.setParameter(4, C_ID);
+        q2.setParameter(5, null);
+        q2.setParameter(6, num_items);
+        q2.setParameter(7, allLocal); //should change
+        q2.setParameter(8, o_entry_d);
+        q2.executeUpdate();
+
+        session.flush();
+        framework.commitTransaction(transaction);
+    }
+
+    public void printOutput(T1Output output){
         System.out.println("-------------Transaction 1 has ended; Showing outputs below-------------");
         System.out.println("W_ID: " + output.W_ID);
         System.out.println("D_ID: " + output.D_ID);
@@ -242,7 +262,8 @@ public class TransactionOne {
     public static void main(String args[]) {
 
         TransactionOne t1 = new TransactionOne();
-        t1.framework.initHibernate(); // Initializing Hibernate
+        Framework framework = Framework.getInstance();
+        framework.initHibernate(); // Initializing Hibernate
 
         List<T1Input> list = t1.createTestInput();
         Instant start = Instant.now();  //calculating start time
@@ -253,21 +274,9 @@ public class TransactionOne {
         System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
         System.out.println("Total queries to database : " + t1.queryCount);
         System.out.println("-------------DONE-------------");
+        //t1.test();
 
-
-        t1.framework.destroy(); // Graceful shutdown of Hibernate
-    }
-}
-
-class T1Input {
-    int itemNumber;
-    int supplierWarehouseNumber;
-    int quantity;
-
-    T1Input(int itemNumber, int supplierWarehouseNumber, int quantity){
-        this.itemNumber = itemNumber;
-        this.supplierWarehouseNumber = supplierWarehouseNumber;
-        this.quantity = quantity;
+        framework.destroy(); // Graceful shutdown of Hibernate
     }
 }
 

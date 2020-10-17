@@ -11,7 +11,7 @@ import java.util.List;
 
 public class TransactionSeven {
 
-    private List<T7Output> transactionSeven(){
+    public List<T7Output> transactionSeven(){
         Framework framework = Framework.getInstance();
         Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
@@ -32,7 +32,7 @@ public class TransactionSeven {
         return outputList;
     }
 
-    private void printOutPut(List<T7Output> outputList){
+    public void printOutPut(List<T7Output> outputList){
         System.out.println("----------Top 10 Customers ranked by remaining balance in descending order----------");
         int i = 0;
         for(T7Output customer: outputList){
