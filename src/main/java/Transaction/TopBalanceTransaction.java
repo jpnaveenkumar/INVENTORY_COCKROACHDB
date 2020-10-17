@@ -9,17 +9,28 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TransactionSeven {
+public class TopBalanceTransaction {
 
-    public List<T7Output> transactionSeven(){
+    Framework framework;
+    Session session;
+
+    public TopBalanceTransaction(){
+        this.framework = Framework.getInstance();
+        this.session = this.framework.getSession();
+    }
+
+    public List<TopBalanceOutput> transactionSeven(){
+        System.out.println("-------------Top Balance Transaction-------------");
+        Instant start = Instant.now();
+
         Framework framework = Framework.getInstance();
         Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
         Query topBalanceQuery = session.createNativeQuery("select c.c_first, c.c_middle, c.c_last, c.c_balance, w.w_name, d.d_name from warehouse w, district d, (select c_id, c_w_id, c_d_id, c_first, c_middle, c_last, c_balance from customer order by c_balance desc limit 10) as c where w.w_id = c.c_w_id and d.d_w_id = c.c_w_id and d.d_id = c.c_d_id limit 10;");
         List<Object[]> list = topBalanceQuery.getResultList();
-        List<T7Output> outputList = new ArrayList<>();
+        List<TopBalanceOutput> outputList = new ArrayList<>();
         for(Object[] o : list){
-            T7Output output = new T7Output();
+            TopBalanceOutput output = new TopBalanceOutput();
             output.C_FIRST = (String) o[0];
             output.C_MIDDLE = (String) o[1];
             output.C_LAST = (String) o[2];
@@ -29,13 +40,18 @@ public class TransactionSeven {
             outputList.add(output);
         }
         framework.commitTransaction(transaction);
+
+        Instant end = Instant.now();
+        Duration timeElapsed = Duration.between(start, end);
+        System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
+
         return outputList;
     }
 
-    public void printOutPut(List<T7Output> outputList){
+    public void printOutPut(List<TopBalanceOutput> outputList){
         System.out.println("----------Top 10 Customers ranked by remaining balance in descending order----------");
         int i = 0;
-        for(T7Output customer: outputList){
+        for(TopBalanceOutput customer: outputList){
             System.out.println("\n-----"+" Customer " + i + " -----");
             System.out.println("First name: " + customer.C_FIRST);
             System.out.println("Middle name: " + customer.C_MIDDLE);
@@ -50,9 +66,9 @@ public class TransactionSeven {
     public static void main(String[] args){
         Framework framework = Framework.getInstance();
         framework.initHibernate(); // Initializing Hibernate
-        TransactionSeven t7 = new TransactionSeven();
+        TopBalanceTransaction t7 = new TopBalanceTransaction();
         Instant start = Instant.now();
-        List<T7Output> outputList = t7.transactionSeven();
+        List<TopBalanceOutput> outputList = t7.transactionSeven();
         Instant end = Instant.now();    //calculating end time
         t7.printOutPut(outputList);
         Duration timeElapsed = Duration.between(start, end);
@@ -64,7 +80,7 @@ public class TransactionSeven {
     }
 }
 
-class T7Output{
+class TopBalanceOutput {
     String C_FIRST;
     String C_MIDDLE;
     String C_LAST;

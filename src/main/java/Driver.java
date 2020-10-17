@@ -51,27 +51,27 @@ public class Driver {
                         System.out.println("pass count : "+count);
                         count++;
                         int numberOfItems = Integer.parseInt(input[4]);
-                        List<T1Input> t1Inputs = new ArrayList<T1Input>();
+                        List<NewOrderInput> newOrderInput = new ArrayList<NewOrderInput>();
                         for(int currentItem=0; currentItem < numberOfItems; currentItem++){
                             String itemInfoAsString = bufferedReader.readLine();
                             String itemInfo[] = itemInfoAsString.split(",");
-                            t1Inputs.add(new T1Input(Integer.parseInt(itemInfo[0]),Integer.parseInt(itemInfo[1]),
+                            newOrderInput.add(new NewOrderInput(Integer.parseInt(itemInfo[0]),Integer.parseInt(itemInfo[1]),
                                     Integer.parseInt(itemInfo[2])));
                         }
-                        TransactionOne transactionOne = new TransactionOne();
-                        transactionOne.printOutput(transactionOne.transactionOne(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
-                                Integer.parseInt(input[3]), numberOfItems, t1Inputs));
+                        NewOrderTransaction newOrderTransaction = new NewOrderTransaction();
+                        newOrderTransaction.printOutput(newOrderTransaction.transactionOne(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                                Integer.parseInt(input[3]), numberOfItems, newOrderInput));
                         break;
                     }
                     case "P":{
-                        TransactionTwo transactionTwo = new TransactionTwo();
-                        transactionTwo.printOutput(transactionTwo.transactionTwo(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                        PaymentTransaction paymentTransaction = new PaymentTransaction();
+                        paymentTransaction.printOutput(paymentTransaction.processPaymentTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
                                 Integer.parseInt(input[3]), Double.parseDouble(input[4])));
                         break;
                     }
                     case "D":{
-                        TransactionThree transactionThree = new TransactionThree();
-                        transactionThree.transactionThree(Integer.parseInt(input[1]), Integer.parseInt(input[2]));
+                        DeliveryTransaction deliveryTransaction = new DeliveryTransaction();
+                        deliveryTransaction.processDeliveryTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]));
                         break;
                     }
                     case "O":{
@@ -103,8 +103,8 @@ public class Driver {
                         break;
                     }
                     case "T":{
-                        TransactionSeven transactionSeven = new TransactionSeven();
-                        transactionSeven.printOutPut(transactionSeven.transactionSeven());
+                        TopBalanceTransaction topBalanceTransaction = new TopBalanceTransaction();
+                        topBalanceTransaction.printOutPut(topBalanceTransaction.transactionSeven());
                         break;
                     }
                     case "R":{
