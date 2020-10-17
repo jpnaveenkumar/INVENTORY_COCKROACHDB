@@ -3,6 +3,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Driver {
@@ -35,14 +37,102 @@ public class Driver {
         framework.commitTransaction(transaction);
     }
 
+    void parseInputFile()
+    {
+        try{
+            InputStream inputStream = Driver.class.getResourceAsStream("xact-files/1.txt");
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            int count=0;
+            while ((line = bufferedReader.readLine())!= null){
+                String[] input =  line.split(",");
+                switch (input[0]){
+                    case "N":{
+                        System.out.println("pass count : "+count);
+                        count++;
+                        int numberOfItems = Integer.parseInt(input[4]);
+                        List<T1Input> t1Inputs = new ArrayList<T1Input>();
+                        for(int currentItem=0; currentItem < numberOfItems; currentItem++){
+                            String itemInfoAsString = bufferedReader.readLine();
+                            String itemInfo[] = itemInfoAsString.split(",");
+                            t1Inputs.add(new T1Input(Integer.parseInt(itemInfo[0]),Integer.parseInt(itemInfo[1]),
+                                    Integer.parseInt(itemInfo[2])));
+                        }
+                        TransactionOne transactionOne = new TransactionOne();
+                        transactionOne.printOutput(transactionOne.transactionOne(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                                Integer.parseInt(input[3]), numberOfItems, t1Inputs));
+                        break;
+                    }
+                    case "P":{
+                        TransactionTwo transactionTwo = new TransactionTwo();
+                        transactionTwo.printOutput(transactionTwo.transactionTwo(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                                Integer.parseInt(input[3]), Double.parseDouble(input[4])));
+                        break;
+                    }
+                    case "D":{
+                        TransactionThree transactionThree = new TransactionThree();
+                        transactionThree.transactionThree(Integer.parseInt(input[1]), Integer.parseInt(input[2]));
+                        break;
+                    }
+                    case "O":{
+                        OrderStatusTransaction orderStatusTransaction = new OrderStatusTransaction(
+                                Integer.parseInt(input[1]),
+                                Integer.parseInt(input[2]),
+                                Integer.parseInt(input[3])
+                        );
+                        orderStatusTransaction.getOrderStatus();
+                        break;
+                    }
+                    case "S":{
+                        StockLevelTransaction stockLevelTransaction = new StockLevelTransaction(
+                                Integer.parseInt(input[1]),
+                                Integer.parseInt(input[2]),
+                                Integer.parseInt(input[3]),
+                                Integer.parseInt(input[4])
+                        );
+                        stockLevelTransaction.performStockLevelTransaction();
+                        break;
+                    }
+                    case "I":{
+                        PopularItemTransaction popularItemTransaction = new PopularItemTransaction(
+                                Integer.parseInt(input[1]),
+                                Integer.parseInt(input[2]),
+                                Integer.parseInt(input[3])
+                        );
+                        popularItemTransaction.findPopulartItemsInLastLOrders();
+                        break;
+                    }
+                    case "T":{
+                        TransactionSeven transactionSeven = new TransactionSeven();
+                        transactionSeven.printOutPut(transactionSeven.transactionSeven());
+                        break;
+                    }
+                    case "R":{
+                        RelatedCustomerTransaction relatedCustomerTransaction = new RelatedCustomerTransaction(
+                                Integer.parseInt(input[1]),
+                                Integer.parseInt(input[3]),
+                                Integer.parseInt(input[2])
+                        );
+                        relatedCustomerTransaction.findRelatedCustomers();
+                        break;
+                    }
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String args[])
     {
-        Driver driver = new Driver();
-        Framework framework = Framework.getInstance();
-        framework.initHibernate(); // Initializing Hibernate
 
-        driver.sampleTestCase1();
-        driver.sampleTestCase2();
+          Driver driver = new Driver();
+          Framework framework = Framework.getInstance();
+          framework.initHibernate(); // Initializing Hibernate
+          driver.parseInputFile();
+
+//        driver.sampleTestCase1();
+//        driver.sampleTestCase2();
 //        OrderStatusTransaction orderStatusTransaction = new OrderStatusTransaction(1, 1 , 1);
 //        orderStatusTransaction.getOrderStatus();
 //        StockLevelTransaction stockLevelTransaction = new StockLevelTransaction(1, 1, 11, 11);

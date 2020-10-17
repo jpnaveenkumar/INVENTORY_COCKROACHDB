@@ -5,6 +5,7 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import java.time.Duration;
@@ -12,7 +13,7 @@ import java.time.Instant;
 
 public class TransactionOne {
     int queryCount = 0;
-    private T1Output transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<T1Input> inputList){
+    public T1Output transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<T1Input> inputList){
 
         //Note : Numbers or alphabet comments above a sequence of code lines indicate which part of problem statement it is related to. Refer section 2.1, Processing steps in project document.
 
@@ -38,7 +39,7 @@ public class TransactionOne {
         queryCount++;
 
         //2
-        Query q1 = session.createQuery("UPDATE District SET D_NEXT_O_ID = D_NEXT_O_ID - 1 WHERE D_W_ID = :warehouseId AND D_ID = :districtId");
+        Query q1 = session.createQuery("UPDATE District SET D_NEXT_O_ID = D_NEXT_O_ID + 1 WHERE D_W_ID = :warehouseId AND D_ID = :districtId");
         q1.setParameter("warehouseId", W_ID);
         q1.setParameter("districtId", D_ID);
         q1.executeUpdate();
@@ -81,7 +82,7 @@ public class TransactionOne {
         StringBuilder insertOrderLineValuesQueryBuilder = new StringBuilder();
 
         //5 (e)
-        StringBuilder getItemPriceQueryBuilder = new StringBuilder("SELECT I_NAME, I_PRICE FROM Item WHERE I_ID IN (");
+        StringBuilder getItemPriceQueryBuilder = new StringBuilder("SELECT I_NAME, I_PRICE, I_ID FROM Item WHERE I_ID IN (");
         //building the query string
         for(int i=0; i<num_items; i++){
             int itemNumber = inputList.get(i).itemNumber;
@@ -90,12 +91,18 @@ public class TransactionOne {
 
         Query getItemPrice = session.createQuery(new String(getItemPriceQueryBuilder));
         List<Object[]> itemDataList = getItemPrice.getResultList();
+        System.out.println(itemDataList.size() + " === "+ num_items);
+        System.out.println(getItemPriceQueryBuilder.toString());
         queryCount++;
         List<Double> itemPriceList = new ArrayList<>();
         List<String> itemNameList = new ArrayList<>();
+        HashMap<Integer, Double> itemIdVsPrice = new HashMap<>();
+        HashMap<Integer, String> itemIdVsName = new HashMap<>();
         for(Object[] o : itemDataList){
-            itemNameList.add((String) o[0]);
-            itemPriceList.add((double) o[1]);
+            itemIdVsPrice.put((Integer)o[2], (double)o[1]);
+            itemIdVsName.put((Integer)o[2], (String)o[0]);
+            //itemNameList.add((String) o[0]);
+            //itemPriceList.add((double) o[1]);
         }
 
         //initializing output list for each item
@@ -126,7 +133,7 @@ public class TransactionOne {
             queryCount++;
 
             //e
-            double itemAmount = quantity * itemPriceList.get(i);
+            double itemAmount = quantity * itemIdVsPrice.get(itemNumber);
 
             //f
             totalAmount += itemAmount;
@@ -138,7 +145,7 @@ public class TransactionOne {
             //setting output data
             ItemOutput itemOutput = new ItemOutput();
             itemOutput.ITEM_NUMBER = i + 1;
-            itemOutput.I_NAME = itemNameList.get(i);
+            itemOutput.I_NAME = itemIdVsName.get(itemNumber);
             itemOutput.SUPPLIER_WAREHOUSE = supplierWarehouseNumber;
             itemOutput.QUANTITY = quantity;
             itemOutput.OL_AMOUNT = itemAmount;
@@ -212,7 +219,7 @@ public class TransactionOne {
         framework.commitTransaction(transaction);
     }
 
-    private void printOutput(T1Output output){
+    public void printOutput(T1Output output){
         System.out.println("-------------Transaction 1 has ended; Showing outputs below-------------");
         System.out.println("W_ID: " + output.W_ID);
         System.out.println("D_ID: " + output.D_ID);
@@ -270,18 +277,6 @@ public class TransactionOne {
         //t1.test();
 
         framework.destroy(); // Graceful shutdown of Hibernate
-    }
-}
-
-class T1Input {
-    int itemNumber;
-    int supplierWarehouseNumber;
-    int quantity;
-
-    T1Input(int itemNumber, int supplierWarehouseNumber, int quantity){
-        this.itemNumber = itemNumber;
-        this.supplierWarehouseNumber = supplierWarehouseNumber;
-        this.quantity = quantity;
     }
 }
 
