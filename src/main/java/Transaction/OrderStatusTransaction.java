@@ -17,13 +17,15 @@ public class OrderStatusTransaction {
     final private Integer customerId;
     final private Framework framework;
     final private Session session;
+    final private Integer serverId;
 
-    public OrderStatusTransaction(Integer warehouseId, Integer districtId, Integer customerId)
+    public OrderStatusTransaction(Integer warehouseId, Integer districtId, Integer customerId, Integer serverId)
     {
+        this.serverId = serverId;
         this.warehouseId = warehouseId;
         this.districtId = districtId;
         this.customerId = customerId;
-        this.framework = Framework.getInstance();
+        this.framework = Framework.getInstance(serverId);
         this.session = framework.getSession();
     }
 

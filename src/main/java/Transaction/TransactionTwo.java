@@ -9,9 +9,11 @@ import java.time.Instant;
 import java.util.Date;
 
 public class TransactionTwo {
-        public T2Output transactionTwo(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT){
+        Integer serverId;
+        public T2Output transactionTwo(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Integer serverId){
+            this.serverId = serverId;
             T2Output t2Output = new T2Output();
-            Framework framework = Framework.getInstance();
+            Framework framework = Framework.getInstance(serverId);
             Session session = framework.getSession();
             Transaction transaction = framework.startTransaction();
 
@@ -120,10 +122,10 @@ public class TransactionTwo {
 
     public static void main(String args[]) {
         TransactionTwo t2 = new TransactionTwo();
-        Framework framework = Framework.getInstance();
+        Framework framework = Framework.getInstance(0);
         framework.initHibernate(); // Initializing Hibernate
         Instant start = Instant.now();
-        T2Output output = t2.transactionTwo(5, 5, 5,1.0);
+        T2Output output = t2.transactionTwo(5, 5, 5,1.0, 0);
         Instant end = Instant.now();    //calculating end time
         Duration timeElapsed = Duration.between(start, end);
         t2.printOutput(output);

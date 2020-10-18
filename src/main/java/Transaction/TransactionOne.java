@@ -13,11 +13,12 @@ import java.time.Instant;
 
 public class TransactionOne {
     int queryCount = 0;
-    public T1Output transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<T1Input> inputList){
+    Integer serverId;
+    public T1Output transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<T1Input> inputList, Integer serverId){
 
         //Note : Numbers or alphabet comments above a sequence of code lines indicate which part of problem statement it is related to. Refer section 2.1, Processing steps in project document.
-
-        Framework framework = Framework.getInstance();
+        this.serverId = serverId;
+        Framework framework = Framework.getInstance(serverId);
         Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
 
@@ -192,7 +193,7 @@ public class TransactionOne {
 
     //function which can be used for unit testing
     private void test(){
-        Framework framework = Framework.getInstance();
+        Framework framework = Framework.getInstance(this.serverId);
         Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
 
@@ -262,12 +263,12 @@ public class TransactionOne {
     public static void main(String args[]) {
 
         TransactionOne t1 = new TransactionOne();
-        Framework framework = Framework.getInstance();
+        Framework framework = Framework.getInstance(0);
         framework.initHibernate(); // Initializing Hibernate
 
         List<T1Input> list = t1.createTestInput();
         Instant start = Instant.now();  //calculating start time
-        T1Output output = t1.transactionOne(1300, 5, 5, 10, list);
+        T1Output output = t1.transactionOne(1300, 5, 5, 10, list, 0);
         Instant end = Instant.now();    //calculating end time
         Duration timeElapsed = Duration.between(start, end);
         t1.printOutput(output);

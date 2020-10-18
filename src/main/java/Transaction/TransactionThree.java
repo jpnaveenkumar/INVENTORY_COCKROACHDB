@@ -11,8 +11,10 @@ import java.util.Date;
 import java.util.List;
 
 public class TransactionThree {
-    public void transactionThree(int W_ID, int CARRIER_ID){
-        Framework framework = Framework.getInstance();
+    Integer serverId;
+    public void transactionThree(int W_ID, int CARRIER_ID, Integer serverId){
+        this.serverId = serverId;
+        Framework framework = Framework.getInstance(serverId);
         Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
 
@@ -78,11 +80,11 @@ public class TransactionThree {
 
 
     public static void main(String[] args){
-        Framework framework = Framework.getInstance();
+        Framework framework = Framework.getInstance(0);
         framework.initHibernate(); // Initializing Hibernate
         TransactionThree t3 = new TransactionThree();
         Instant start = Instant.now();
-        t3.transactionThree(1, 10);
+        t3.transactionThree(1, 10, 0);
         Instant end = Instant.now();    //calculating end time
         Duration timeElapsed = Duration.between(start, end);
 

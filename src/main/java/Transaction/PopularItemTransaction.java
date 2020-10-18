@@ -15,12 +15,14 @@ public class PopularItemTransaction {
     private Framework framework;
     private Set<Integer> listOfAllPopularItems;
     private Session session;
+    private Integer serverId;
 
-    public PopularItemTransaction(Integer warehouseId, Integer districtId, Integer lastLOrders){
+    public PopularItemTransaction(Integer warehouseId, Integer districtId, Integer lastLOrders, Integer serverId){
+        this.serverId = serverId;
         this.warehouseId = warehouseId;
         this.districtId = districtId;
         this.lastLOrders = lastLOrders;
-        this.framework = Framework.getInstance();
+        this.framework = Framework.getInstance(serverId);
         this.session = this.framework.getSession();
     }
 

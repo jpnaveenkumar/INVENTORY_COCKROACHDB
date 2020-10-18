@@ -10,9 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TransactionSeven {
-
-    public List<T7Output> transactionSeven(){
-        Framework framework = Framework.getInstance();
+    Integer serverId;
+    public List<T7Output> transactionSeven(Integer serverId){
+        this.serverId = serverId;
+        Framework framework = Framework.getInstance(serverId);
         Session session = framework.getSession();
         Transaction transaction = framework.startTransaction();
         Query topBalanceQuery = session.createNativeQuery("select c.c_first, c.c_middle, c.c_last, c.c_balance, w.w_name, d.d_name from warehouse w, district d, (select c_id, c_w_id, c_d_id, c_first, c_middle, c_last, c_balance from customer order by c_balance desc limit 10) as c where w.w_id = c.c_w_id and d.d_w_id = c.c_w_id and d.d_id = c.c_d_id limit 10;");
@@ -48,11 +49,11 @@ public class TransactionSeven {
     }
 
     public static void main(String[] args){
-        Framework framework = Framework.getInstance();
+        Framework framework = Framework.getInstance(0);
         framework.initHibernate(); // Initializing Hibernate
         TransactionSeven t7 = new TransactionSeven();
         Instant start = Instant.now();
-        List<T7Output> outputList = t7.transactionSeven();
+        List<T7Output> outputList = t7.transactionSeven(0);
         Instant end = Instant.now();    //calculating end time
         t7.printOutPut(outputList);
         Duration timeElapsed = Duration.between(start, end);

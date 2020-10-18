@@ -10,15 +10,17 @@ public class RelatedCustomerTransaction {
     Integer warehouseId;
     Integer customerId;
     Integer districtId;
+    Integer serverId;
     Framework framework;
     Session session;
 
-    public RelatedCustomerTransaction(Integer warehouseId, Integer customerId, Integer districtId)
+    public RelatedCustomerTransaction(Integer warehouseId, Integer customerId, Integer districtId, Integer serverId)
     {
+        this.serverId = serverId;
         this.warehouseId = warehouseId;
         this.customerId = customerId;
         this.districtId = districtId;
-        this.framework = Framework.getInstance();
+        this.framework = Framework.getInstance(this.serverId);
         this.session = this.framework.getSession();
     }
 

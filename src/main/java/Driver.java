@@ -7,40 +7,27 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Driver {
+class TestCaseManager extends Thread
+{
+    String testCaseFileName;
+    Integer serverId;
 
-    void sampleTestCase1()
+    TestCaseManager(String testCaseFileName, Integer serverId)
     {
-        Framework framework = Framework.getInstance();
-        Session session = framework.getSession();
-        Transaction transaction = framework.startTransaction();
-        String hql = "FROM Warehouse as W where W.W_ID = 1";
-        Query query = session.createQuery(hql);
-        List result = query.list();
-        System.out.println(result);
-        framework.commitTransaction(transaction);
+        this.testCaseFileName = testCaseFileName;
+        this.serverId = serverId;
     }
 
-    void sampleTestCase2()
+    public void run()
     {
-        Framework framework = Framework.getInstance();
-        Session session = framework.getSession();
-        Transaction transaction = framework.startTransaction();
-        Query query = session.createNativeQuery("select s_i_id from stock s inner join (select ol_i_id from orderline where ol_w_id = :w_id and ol_d_id = :d_id and ol_o_id >= :s_o_id and ol_o_id < :e_o_id) as d on s.s_i_id = d.ol_i_id and s.s_w_id = :w_id where s.s_quantity < :threshold");
-        query.setParameter("w_id", 1);
-        query.setParameter("d_id", 1);
-        query.setParameter("s_o_id", 2990);
-        query.setParameter("e_o_id", 3001);
-        query.setParameter("threshold", 11);
-        List result = query.list();
-        System.out.println(result);
-        framework.commitTransaction(transaction);
+        System.out.println(this.testCaseFileName + " has started executing....");
+        parseInputFile(this.testCaseFileName);
     }
 
-    void parseInputFile()
+    void parseInputFile(String fileURI)
     {
         try{
-            InputStream inputStream = Driver.class.getResourceAsStream("xact-files/1.txt");
+            InputStream inputStream = Driver.class.getResourceAsStream(fileURI);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String line;
             int count=0;
@@ -60,25 +47,26 @@ public class Driver {
                         }
                         TransactionOne transactionOne = new TransactionOne();
                         transactionOne.printOutput(transactionOne.transactionOne(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
-                                Integer.parseInt(input[3]), numberOfItems, t1Inputs));
+                                Integer.parseInt(input[3]), numberOfItems, t1Inputs, this.serverId));
                         break;
                     }
                     case "P":{
                         TransactionTwo transactionTwo = new TransactionTwo();
                         transactionTwo.printOutput(transactionTwo.transactionTwo(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
-                                Integer.parseInt(input[3]), Double.parseDouble(input[4])));
+                                Integer.parseInt(input[3]), Double.parseDouble(input[4]), this.serverId));
                         break;
                     }
                     case "D":{
                         TransactionThree transactionThree = new TransactionThree();
-                        transactionThree.transactionThree(Integer.parseInt(input[1]), Integer.parseInt(input[2]));
+                        transactionThree.transactionThree(Integer.parseInt(input[1]), Integer.parseInt(input[2]), this.serverId);
                         break;
                     }
                     case "O":{
                         OrderStatusTransaction orderStatusTransaction = new OrderStatusTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[2]),
-                                Integer.parseInt(input[3])
+                                Integer.parseInt(input[3]),
+                                this.serverId
                         );
                         orderStatusTransaction.getOrderStatus();
                         break;
@@ -88,7 +76,8 @@ public class Driver {
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[2]),
                                 Integer.parseInt(input[3]),
-                                Integer.parseInt(input[4])
+                                Integer.parseInt(input[4]),
+                                this.serverId
                         );
                         stockLevelTransaction.performStockLevelTransaction();
                         break;
@@ -97,21 +86,23 @@ public class Driver {
                         PopularItemTransaction popularItemTransaction = new PopularItemTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[2]),
-                                Integer.parseInt(input[3])
+                                Integer.parseInt(input[3]),
+                                this.serverId
                         );
                         popularItemTransaction.findPopulartItemsInLastLOrders();
                         break;
                     }
                     case "T":{
                         TransactionSeven transactionSeven = new TransactionSeven();
-                        transactionSeven.printOutPut(transactionSeven.transactionSeven());
+                        transactionSeven.printOutPut(transactionSeven.transactionSeven(this.serverId));
                         break;
                     }
                     case "R":{
                         RelatedCustomerTransaction relatedCustomerTransaction = new RelatedCustomerTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[3]),
-                                Integer.parseInt(input[2])
+                                Integer.parseInt(input[2]),
+                                this.serverId
                         );
                         relatedCustomerTransaction.findRelatedCustomers();
                         break;
@@ -122,26 +113,31 @@ public class Driver {
             e.printStackTrace();
         }
     }
+}
+
+public class Driver {
+
+    final Integer numberOfClients = 5;
+    final Integer numberOfServers = 5;
+
+    void init()
+    {
+        for(int i=1; i < numberOfClients; i++){
+            String fileName = "xact-files/"+i+".txt";
+            Integer serverId = i % numberOfServers;
+            TestCaseManager testCaseManager = new TestCaseManager( fileName, serverId);
+            testCaseManager.start();
+            //testCaseManager.parseInputFile(fileName);
+        }
+    }
 
     public static void main(String args[])
     {
 
-          Driver driver = new Driver();
-          Framework framework = Framework.getInstance();
-          framework.initHibernate(); // Initializing Hibernate
-          driver.parseInputFile();
-
-//        driver.sampleTestCase1();
-//        driver.sampleTestCase2();
-//        OrderStatusTransaction orderStatusTransaction = new OrderStatusTransaction(1, 1 , 1);
-//        orderStatusTransaction.getOrderStatus();
-//        StockLevelTransaction stockLevelTransaction = new StockLevelTransaction(1, 1, 11, 11);
-//        stockLevelTransaction.performStockLevelTransaction();
-//          PopularItemTransaction popularItemTransaction = new PopularItemTransaction(1, 1, 11);
-//          popularItemTransaction.findPopulartItemsInLastLOrders();
-//        RelatedCustomerTransaction relatedCustomerTransaction = new RelatedCustomerTransaction(1,1,1);
-//        relatedCustomerTransaction.findRelatedCustomers();
-
-        framework.destroy(); // Graceful shutdown of Hibernate
+      Driver driver = new Driver();
+      Framework framework = Framework.getInstance(0);
+      framework.initHibernate(); // Initializing Hibernate
+      driver.init(); // start executing test case files
+      //framework.destroy(); // Graceful shutdown of Hibernate
     }
 }

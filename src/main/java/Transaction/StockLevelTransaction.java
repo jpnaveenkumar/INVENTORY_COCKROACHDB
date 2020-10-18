@@ -11,16 +11,18 @@ public class StockLevelTransaction {
     private Integer districtId;
     private Integer threshold;
     private Integer lastLOrders;
+    private Integer serverId;
     Framework framework;
     Session session;
 
-    public StockLevelTransaction(Integer warehouseId, Integer districtId, Integer threshold, Integer lastLOrders)
+    public StockLevelTransaction(Integer warehouseId, Integer districtId, Integer threshold, Integer lastLOrders, Integer serverId)
     {
+        this.serverId = serverId;
         this.warehouseId = warehouseId;
         this.districtId = districtId;
         this.threshold = threshold;
         this.lastLOrders = lastLOrders;
-        this.framework = Framework.getInstance();
+        this.framework = Framework.getInstance(serverId);
         this.session = this.framework.getSession();
     }
 
