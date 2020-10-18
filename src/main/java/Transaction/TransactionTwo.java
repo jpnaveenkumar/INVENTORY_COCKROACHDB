@@ -6,7 +6,6 @@ import org.hibernate.query.Query;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 
 public class TransactionTwo {
         Integer serverId;
