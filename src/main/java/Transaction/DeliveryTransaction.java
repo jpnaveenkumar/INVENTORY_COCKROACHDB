@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class TransactionThree {
+public class DeliveryTransaction {
+
     Integer serverId;
+
     public void transactionThree(int W_ID, int CARRIER_ID, Integer serverId){
         this.serverId = serverId;
         Framework framework = Framework.getInstance(serverId);
@@ -21,6 +23,7 @@ public class TransactionThree {
         List<Integer> smallestOrderNumber = new ArrayList<>();
         List<Integer> customerOfSmallestOrderNumber = new ArrayList<>();
         StringBuilder getSmallestOrderNumberQueryBuilder = new StringBuilder();
+
         for(int i=1;i<=10;i++){
             String formatted = String.format("(select o_id, o_c_id, %d as sortorder from orders where o_w_id = %d and o_d_id = %d and o_carrier_id = %s order by o_id limit 1)", i, W_ID, i, "'" + null + "'");
             getSmallestOrderNumberQueryBuilder.append(formatted);
@@ -77,20 +80,4 @@ public class TransactionThree {
         framework.commitTransaction(transaction);
     }
 
-
-
-    public static void main(String[] args){
-        Framework framework = Framework.getInstance(0);
-        framework.initHibernate(); // Initializing Hibernate
-        TransactionThree t3 = new TransactionThree();
-        Instant start = Instant.now();
-        t3.transactionThree(1, 10, 0);
-        Instant end = Instant.now();    //calculating end time
-        Duration timeElapsed = Duration.between(start, end);
-
-        System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
-        System.out.println("-------------DONE-------------");
-
-        framework.destroy();
-    }
 }

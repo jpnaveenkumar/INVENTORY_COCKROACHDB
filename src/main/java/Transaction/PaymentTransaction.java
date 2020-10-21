@@ -7,11 +7,11 @@ import org.hibernate.query.Query;
 import java.time.Duration;
 import java.time.Instant;
 
-public class TransactionTwo {
+public class PaymentTransaction {
         Integer serverId;
-        public T2Output transactionTwo(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Integer serverId){
+        public PaymentTransactionOutput transactionTwo(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Integer serverId){
             this.serverId = serverId;
-            T2Output t2Output = new T2Output();
+            PaymentTransactionOutput paymentTransactionOutput = new PaymentTransactionOutput();
             Framework framework = Framework.getInstance(serverId);
             Session session = framework.getSession();
             Transaction transaction = framework.startTransaction();
@@ -39,50 +39,50 @@ public class TransactionTwo {
             getCustomerData.setParameter("c_d_id", C_D_ID);
             getCustomerData.setParameter("c_id", C_ID);
             Object[] result = (Object[]) getCustomerData.getSingleResult();
-            t2Output.C_W_ID = (int) result[0];
-            t2Output.C_D_ID = (int) result[1];
-            t2Output.C_ID = (int) result[2];
-            t2Output.C_FIRST = (String) result[3];
-            t2Output.C_MIDDLE = (String) result[4];
-            t2Output.C_LAST = (String) result[5];
-            t2Output.C_STREET_1 = (String) result[6];
-            t2Output.C_STREET_2 = (String) result[7];
-            t2Output.C_CITY = (String) result[8];
-            t2Output.C_STATE = (String) result[9];
-            t2Output.C_ZIP = (String) result[10];
-            t2Output.C_PHONE = (String) result[11];
-            t2Output.C_SINCE = (String) result[12];
-            t2Output.C_CREDIT = (String) result[13];
-            t2Output.C_CREDIT_LIM = (double) result[14];
-            t2Output.C_DISCOUNT = (double) result[15];
-            t2Output.C_BALANCE = (double) result[16];
+            paymentTransactionOutput.C_W_ID = (int) result[0];
+            paymentTransactionOutput.C_D_ID = (int) result[1];
+            paymentTransactionOutput.C_ID = (int) result[2];
+            paymentTransactionOutput.C_FIRST = (String) result[3];
+            paymentTransactionOutput.C_MIDDLE = (String) result[4];
+            paymentTransactionOutput.C_LAST = (String) result[5];
+            paymentTransactionOutput.C_STREET_1 = (String) result[6];
+            paymentTransactionOutput.C_STREET_2 = (String) result[7];
+            paymentTransactionOutput.C_CITY = (String) result[8];
+            paymentTransactionOutput.C_STATE = (String) result[9];
+            paymentTransactionOutput.C_ZIP = (String) result[10];
+            paymentTransactionOutput.C_PHONE = (String) result[11];
+            paymentTransactionOutput.C_SINCE = (String) result[12];
+            paymentTransactionOutput.C_CREDIT = (String) result[13];
+            paymentTransactionOutput.C_CREDIT_LIM = (double) result[14];
+            paymentTransactionOutput.C_DISCOUNT = (double) result[15];
+            paymentTransactionOutput.C_BALANCE = (double) result[16];
 
             Query getWarehouseData = session.createNativeQuery("SELECT W_STREET_1, W_STREET2, W_CITY, W_STATE, W_ZIP FROM warehouse WHERE W_ID = :c_w_id");
             getWarehouseData.setParameter("c_w_id", C_W_ID);
             Object[] result2 = (Object[]) getWarehouseData.getSingleResult();
-            t2Output.W_STREET_1 = (String) result2[0];
-            t2Output.W_STREET_2 = (String) result2[1];
-            t2Output.W_CITY = (String) result2[2];
-            t2Output.W_STATE = (String) result2[3];
-            t2Output.W_ZIP = (String) result2[4];
+            paymentTransactionOutput.W_STREET_1 = (String) result2[0];
+            paymentTransactionOutput.W_STREET_2 = (String) result2[1];
+            paymentTransactionOutput.W_CITY = (String) result2[2];
+            paymentTransactionOutput.W_STATE = (String) result2[3];
+            paymentTransactionOutput.W_ZIP = (String) result2[4];
 
             Query getDistrictData = session.createNativeQuery("SELECT D_STREET_1, D_STREET_2, D_CITY, D_STATE, D_ZIP FROM district WHERE D_W_ID = :c_w_id AND D_ID = :c_d_id");
             getDistrictData.setParameter("c_w_id", C_W_ID);
             getDistrictData.setParameter("c_d_id", C_D_ID);
             Object[] result3 = (Object[]) getDistrictData.getSingleResult();
-            t2Output.D_STREET_1 = (String) result3[0];
-            t2Output.D_STREET_2 = (String) result3[1];
-            t2Output.D_CITY = (String) result3[2];
-            t2Output.D_STATE = (String) result3[3];
-            t2Output.D_ZIP = (String) result3[4];
+            paymentTransactionOutput.D_STREET_1 = (String) result3[0];
+            paymentTransactionOutput.D_STREET_2 = (String) result3[1];
+            paymentTransactionOutput.D_CITY = (String) result3[2];
+            paymentTransactionOutput.D_STATE = (String) result3[3];
+            paymentTransactionOutput.D_ZIP = (String) result3[4];
 
-            t2Output.PAYMENT = PAYMENT;
+            paymentTransactionOutput.PAYMENT = PAYMENT;
 
             framework.commitTransaction(transaction);
-            return t2Output;
+            return paymentTransactionOutput;
         }
 
-    public void printOutput(T2Output output){
+    public void printOutput(PaymentTransactionOutput output){
         System.out.println("-------------Transaction 2 has ended; Showing outputs below-------------");
         System.out.println("C_W_ID: " + output.C_W_ID);
         System.out.println("C_D_ID: " + output.C_D_ID);
@@ -120,11 +120,11 @@ public class TransactionTwo {
 
 
     public static void main(String args[]) {
-        TransactionTwo t2 = new TransactionTwo();
+        PaymentTransaction t2 = new PaymentTransaction();
         Framework framework = Framework.getInstance(0);
         framework.initHibernate(); // Initializing Hibernate
         Instant start = Instant.now();
-        T2Output output = t2.transactionTwo(5, 5, 5,1.0, 0);
+        PaymentTransactionOutput output = t2.transactionTwo(5, 5, 5,1.0, 0);
         Instant end = Instant.now();    //calculating end time
         Duration timeElapsed = Duration.between(start, end);
         t2.printOutput(output);
@@ -134,7 +134,7 @@ public class TransactionTwo {
     }
 }
 
-class T2Output{
+class PaymentTransactionOutput {
     //customer
     int C_W_ID;
     int C_D_ID;

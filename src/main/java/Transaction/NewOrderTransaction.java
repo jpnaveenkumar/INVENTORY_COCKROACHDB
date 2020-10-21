@@ -8,13 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import java.time.Duration;
-import java.time.Instant;
-
-public class TransactionOne {
+public class NewOrderTransaction {
     int queryCount = 0;
     Integer serverId;
-    public T1Output transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<T1Input> inputList, Integer serverId){
+    public NewOrderTransactionOutput transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<NewOrderTransactionInput> inputList, Integer serverId){
 
         //Note : Numbers or alphabet comments above a sequence of code lines indicate which part of problem statement it is related to. Refer section 2.1, Processing steps in project document.
         this.serverId = serverId;
@@ -23,7 +20,7 @@ public class TransactionOne {
         Transaction transaction = framework.startTransaction();
 
         //List<T1Input> inputList = new ArrayList<T1Input>();
-        T1Output t1Output = new T1Output();
+        NewOrderTransactionOutput newOrderTransactionOutput = new NewOrderTransactionOutput();
 
         //1, 6
         Query q0 = session.createNativeQuery("SELECT D_NEXT_O_ID, D_TAX, W_TAX, C_DISCOUNT, C_LAST, C_CREDIT from district, warehouse, customer where D_ID = :d_id and D_W_ID = :w_id and W_ID = :w_id and C_ID = :c_id and C_W_ID = :w_id and C_D_ID = :d_id");
@@ -35,8 +32,8 @@ public class TransactionOne {
         double d_tax = (double) districtList[1];
         double w_tax = (double) districtList[2];
         double c_discount = (double) districtList[3];
-        t1Output.C_LAST = (String) districtList[4];
-        t1Output.C_CREDIT = (String) districtList[5];
+        newOrderTransactionOutput.C_LAST = (String) districtList[4];
+        newOrderTransactionOutput.C_CREDIT = (String) districtList[5];
         queryCount++;
 
         //2
@@ -95,15 +92,11 @@ public class TransactionOne {
         System.out.println(itemDataList.size() + " === "+ num_items);
         System.out.println(getItemPriceQueryBuilder.toString());
         queryCount++;
-        List<Double> itemPriceList = new ArrayList<>();
-        List<String> itemNameList = new ArrayList<>();
         HashMap<Integer, Double> itemIdVsPrice = new HashMap<>();
         HashMap<Integer, String> itemIdVsName = new HashMap<>();
         for(Object[] o : itemDataList){
             itemIdVsPrice.put((Integer)o[2], (double)o[1]);
             itemIdVsName.put((Integer)o[2], (String)o[0]);
-            //itemNameList.add((String) o[0]);
-            //itemPriceList.add((double) o[1]);
         }
 
         //initializing output list for each item
@@ -166,61 +159,32 @@ public class TransactionOne {
         totalAmount = totalAmount * (1 + d_tax + w_tax) * (1 - c_discount);
 
         //setting output data
-        t1Output.W_ID = W_ID;
-        t1Output.C_ID = C_ID;
-        t1Output.D_ID = D_ID;
-        t1Output.C_DISCOUNT = c_discount;
+        newOrderTransactionOutput.W_ID = W_ID;
+        newOrderTransactionOutput.C_ID = C_ID;
+        newOrderTransactionOutput.D_ID = D_ID;
+        newOrderTransactionOutput.C_DISCOUNT = c_discount;
 
-        t1Output.W_TAX = w_tax;
-        t1Output.D_TAX = d_tax;
-        t1Output.O_ID = N;
-        t1Output.O_ENTRY_D = o_entry_d;
-        t1Output.NUM_ITEMS = num_items;
-        t1Output.TOTAL_AMOUNT = totalAmount;
-        t1Output.itemOutputs = itemOutputs;
+        newOrderTransactionOutput.W_TAX = w_tax;
+        newOrderTransactionOutput.D_TAX = d_tax;
+        newOrderTransactionOutput.O_ID = N;
+        newOrderTransactionOutput.O_ENTRY_D = o_entry_d;
+        newOrderTransactionOutput.NUM_ITEMS = num_items;
+        newOrderTransactionOutput.TOTAL_AMOUNT = totalAmount;
+        newOrderTransactionOutput.itemOutputs = itemOutputs;
 
         framework.commitTransaction(transaction);
-        return t1Output;
+        return newOrderTransactionOutput;
     }
 
-    private int checkAllLocal(List<T1Input> inputs, int W_ID){
-        for(T1Input input: inputs){
+    private int checkAllLocal(List<NewOrderTransactionInput> inputs, int W_ID){
+        for(NewOrderTransactionInput input: inputs){
             if(input.supplierWarehouseNumber != W_ID)
                 return 0;
         }
         return 1;
     }
 
-    //function which can be used for unit testing
-    private void test(){
-        Framework framework = Framework.getInstance(this.serverId);
-        Session session = framework.getSession();
-        Transaction transaction = framework.startTransaction();
-
-        int W_ID = 3;
-        int D_ID = 3;
-        int C_ID = 1281;
-        int num_items = 10;
-        int N = 3000;
-        int allLocal = 1;
-        String o_entry_d = String.valueOf(java.time.LocalTime.now());
-        String s2 = String.format("insert into Order(O_W_ID, O_D_ID, O_ID, O_C_ID, O_CARRIER_ID, O_OL_CNT, O_ALL_LOCAL, O_ENTRY_D) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)");
-        Query q2 = session.createNativeQuery(s2);
-        q2.setParameter(1, W_ID);
-        q2.setParameter(2, D_ID);
-        q2.setParameter(3, N);
-        q2.setParameter(4, C_ID);
-        q2.setParameter(5, null);
-        q2.setParameter(6, num_items);
-        q2.setParameter(7, allLocal); //should change
-        q2.setParameter(8, o_entry_d);
-        q2.executeUpdate();
-
-        session.flush();
-        framework.commitTransaction(transaction);
-    }
-
-    public void printOutput(T1Output output){
+    public void printOutput(NewOrderTransactionOutput output){
         System.out.println("-------------Transaction 1 has ended; Showing outputs below-------------");
         System.out.println("W_ID: " + output.W_ID);
         System.out.println("D_ID: " + output.D_ID);
@@ -244,44 +208,9 @@ public class TransactionOne {
             System.out.println("S_QUANTITY: " + itemOutput.S_QUANTITY);
         }
     }
-
-    private List<T1Input> createTestInput(){
-        List<T1Input> list = new ArrayList<T1Input>();
-        list.add(new T1Input(1,2,10));
-        list.add(new T1Input(2,2,10));
-        list.add(new T1Input(3,2,10));
-        list.add(new T1Input(4,2,10));
-        list.add(new T1Input(5,2,10));
-        list.add(new T1Input(6,2,10));
-        list.add(new T1Input(7,2,10));
-        list.add(new T1Input(8,2,10));
-        list.add(new T1Input(9,2,10));
-        list.add(new T1Input(10,2,10));
-        return list;
-    }
-
-    public static void main(String args[]) {
-
-        TransactionOne t1 = new TransactionOne();
-        Framework framework = Framework.getInstance(0);
-        framework.initHibernate(); // Initializing Hibernate
-
-        List<T1Input> list = t1.createTestInput();
-        Instant start = Instant.now();  //calculating start time
-        T1Output output = t1.transactionOne(1300, 5, 5, 10, list, 0);
-        Instant end = Instant.now();    //calculating end time
-        Duration timeElapsed = Duration.between(start, end);
-        t1.printOutput(output);
-        System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
-        System.out.println("Total queries to database : " + t1.queryCount);
-        System.out.println("-------------DONE-------------");
-        //t1.test();
-
-        framework.destroy(); // Graceful shutdown of Hibernate
-    }
 }
 
-class T1Output {
+class NewOrderTransactionOutput {
     //1
     Integer W_ID;
     Integer D_ID;
