@@ -6,9 +6,7 @@ import java.util.List;
 public class CSVWriter {
     public void writeToFile(List<String> lists) throws IOException {
         FileWriter csvWriter = new FileWriter("db_state.csv");
-        for(String line : lists){
-            csvWriter.append(String.join(",", line));
-        }
+        csvWriter.append(String.join(",", lists));
         csvWriter.append("\n");
         csvWriter.flush();
         csvWriter.close();
@@ -40,9 +38,7 @@ public class CSVWriter {
             }
         }
         for(List<String> fileParserOutputList : fileParserOutputLists){
-            for(String line : fileParserOutputList){
-                csvWriter.append(String.join(",", line));
-            }
+            csvWriter.append(String.join(",", fileParserOutputList));
             csvWriter.append("\n");
         }
         csvWriter.flush();
