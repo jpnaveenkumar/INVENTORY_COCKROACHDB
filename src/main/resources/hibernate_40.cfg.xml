@@ -13,7 +13,7 @@
         <property name="connection.password"></property>
 
         <!-- Required so a table can be created from the 'Account' class in Sample.java -->
-        <property name="hibernate.hbm2ddl.auto">create</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.hbm2ddl.import_files">
             /script.sql
         </property>

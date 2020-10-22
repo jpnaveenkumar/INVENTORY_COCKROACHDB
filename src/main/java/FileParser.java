@@ -53,8 +53,8 @@ public class FileParser {
                     case "D":{
                         System.out.println("-----Delivery Transaction-----");
                         transactionCounts[2]++;
-                        DeliveryTransaction deliveryTransaction = new DeliveryTransaction();
-                        deliveryTransaction.processDeliveryTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]), serverId);
+                        DeliveryTransactionRunner deliveryTransactionRunner = new DeliveryTransactionRunner();
+                        deliveryTransactionRunner.processDeliveryTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]), serverId);
                         break;
                     }
                     case "O":{
