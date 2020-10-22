@@ -11,7 +11,7 @@ import java.util.List;
 public class NewOrderTransaction {
     int queryCount = 0;
     Integer serverId;
-    public NewOrderTransactionOutput transactionOne(int C_ID, int W_ID, int D_ID, int num_items, List<NewOrderTransactionInput> inputList, Integer serverId){
+    public NewOrderTransactionOutput processNewOrderTransaction(int C_ID, int W_ID, int D_ID, int num_items, List<NewOrderTransactionInput> inputList, Integer serverId){
 
         //Note : Numbers or alphabet comments above a sequence of code lines indicate which part of problem statement it is related to. Refer section 2.1, Processing steps in project document.
         this.serverId = serverId;
@@ -89,8 +89,11 @@ public class NewOrderTransaction {
 
         Query getItemPrice = session.createQuery(new String(getItemPriceQueryBuilder));
         List<Object[]> itemDataList = getItemPrice.getResultList();
-        System.out.println(itemDataList.size() + " === "+ num_items);
-        System.out.println(getItemPriceQueryBuilder.toString());
+        if(itemDataList.size()!=num_items){
+            System.out.println("Not equal");
+            System.out.println(itemDataList.size() + " === "+ num_items);
+            System.out.println(getItemPriceQueryBuilder.toString());
+        }
         queryCount++;
         HashMap<Integer, Double> itemIdVsPrice = new HashMap<>();
         HashMap<Integer, String> itemIdVsName = new HashMap<>();
@@ -185,7 +188,7 @@ public class NewOrderTransaction {
     }
 
     public void printOutput(NewOrderTransactionOutput output){
-        System.out.println("-------------Transaction 1 has ended; Showing outputs below-------------");
+        System.out.println("-------------Output of New Order Transaction-------------");
         System.out.println("W_ID: " + output.W_ID);
         System.out.println("D_ID: " + output.D_ID);
         System.out.println("C_ID: " + output.C_ID);

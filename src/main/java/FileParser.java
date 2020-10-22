@@ -3,7 +3,6 @@ import Transaction.*;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.Driver;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -17,18 +16,21 @@ public class FileParser {
         List<Double> timeList = new ArrayList<>();
         int numberOfTransactions = 0;
         Double totalExecutionTime = 0.0;
+        int[] transactionCounts = new int[8];
         try{
-            InputStream inputStream = Driver.class.getResourceAsStream(fileURI);
+            InputStream inputStream = FileParser.class.getResourceAsStream(fileURI);
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String line;
             while ((line = bufferedReader.readLine())!= null){
+                System.out.println("line: " + line);
                 String[] input =  line.split(",");
                 Instant startTime = Instant.now();
                 switch (input[0]){
                     case "N":{
                         System.out.println("-----New Order Transaction-----");
+                        transactionCounts[0]++;
                         int numberOfItems = Integer.parseInt(input[4]);
-                        List<NewOrderTransactionInput> newOrderTransactionInputs = new ArrayList<NewOrderTransactionInput>();
+                        List<NewOrderTransactionInput> newOrderTransactionInputs = new ArrayList<>();
                         for(int currentItem=0; currentItem < numberOfItems; currentItem++){
                             String itemInfoAsString = bufferedReader.readLine();
                             String itemInfo[] = itemInfoAsString.split(",");
@@ -36,22 +38,28 @@ public class FileParser {
                                     Integer.parseInt(itemInfo[2])));
                         }
                         NewOrderTransaction newOrderTransaction = new NewOrderTransaction();
-                        newOrderTransaction.printOutput(newOrderTransaction.transactionOne(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                        newOrderTransaction.printOutput(newOrderTransaction.processNewOrderTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
                                 Integer.parseInt(input[3]), numberOfItems, newOrderTransactionInputs, serverId));
                         break;
                     }
                     case "P":{
+                        System.out.println("-----Payment Transaction-----");
+                        transactionCounts[1]++;
                         PaymentTransaction paymentTransaction = new PaymentTransaction();
-                        paymentTransaction.printOutput(paymentTransaction.transactionTwo(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                        paymentTransaction.printOutput(paymentTransaction.processPaymentTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
                                 Integer.parseInt(input[3]), Double.parseDouble(input[4]), serverId));
                         break;
                     }
                     case "D":{
+                        System.out.println("-----Delivery Transaction-----");
+                        transactionCounts[2]++;
                         DeliveryTransaction deliveryTransaction = new DeliveryTransaction();
-                        deliveryTransaction.transactionThree(Integer.parseInt(input[1]), Integer.parseInt(input[2]), serverId);
+                        deliveryTransaction.processDeliveryTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]), serverId);
                         break;
                     }
                     case "O":{
+                        System.out.println("-----Order Status Transaction-----");
+                        transactionCounts[3]++;
                         OrderStatusTransaction orderStatusTransaction = new OrderStatusTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[2]),
@@ -62,6 +70,8 @@ public class FileParser {
                         break;
                     }
                     case "S":{
+                        System.out.println("-----Stock Level Transaction-----");
+                        transactionCounts[4]++;
                         StockLevelTransaction stockLevelTransaction = new StockLevelTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[2]),
@@ -73,6 +83,8 @@ public class FileParser {
                         break;
                     }
                     case "I":{
+                        transactionCounts[5]++;
+                        System.out.println("-----Popular Item Transaction-----");
                         PopularItemTransaction popularItemTransaction = new PopularItemTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[2]),
@@ -83,11 +95,15 @@ public class FileParser {
                         break;
                     }
                     case "T":{
+                        transactionCounts[6]++;
+                        System.out.println("-----Top Balance Transaction-----");
                         TopBalanceTransaction topBalanceTransaction = new TopBalanceTransaction();
                         topBalanceTransaction.printOutPut(topBalanceTransaction.transactionSeven(serverId));
                         break;
                     }
                     case "R":{
+                        System.out.println("-----Related Customer Transaction-----");
+                        transactionCounts[7]++;
                         RelatedCustomerTransaction relatedCustomerTransaction = new RelatedCustomerTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[3]),
@@ -104,22 +120,20 @@ public class FileParser {
                 timeList.add(timeTakenForThisTransaction);
                 totalExecutionTime += timeTakenForThisTransaction;
                 numberOfTransactions++;
+                System.out.println("Completed Transaction " + numberOfTransactions + " in " + timeTakenForThisTransaction + " seconds");
             }
-
         }catch (Exception e){
             e.printStackTrace();
-        }
-        finally {
-
         }
         fileParserOutput.numberOfTransactions = numberOfTransactions;
         fileParserOutput.totalExecutionTime = totalExecutionTime;
         fileParserOutput.transactionThroughput = fileParserOutput.numberOfTransactions / fileParserOutput.totalExecutionTime;
         fileParserOutput.averageTransactionLatency = fileParserOutput.totalExecutionTime / fileParserOutput.numberOfTransactions;
-        fileParserOutput.medianTransactionLatency = getMedianLatency(numberOfTransactions, timeList);
         Collections.sort(timeList); //sort the list to find percentile latency
+        fileParserOutput.medianTransactionLatency = getMedianLatency(numberOfTransactions, timeList);
         fileParserOutput.ninetyFifthPercentileLatency = getPercentileLatency(95, timeList);
         fileParserOutput.ninetyNinthPercentageLatency = getPercentileLatency(99, timeList);
+        fileParserOutput.transactionCounts = transactionCounts;
         return fileParserOutput;
     }
 
@@ -129,7 +143,7 @@ public class FileParser {
     }
 
     private double getMedianLatency(int numberOfTransactions, List<Double> timeList){
-        if(numberOfTransactions / 2 == 0){
+        if(numberOfTransactions % 2 == 0){
             return (timeList.get((int)numberOfTransactions / 2) + timeList.get((int)(numberOfTransactions / 2) - 1)) / 2;
         } else{
             return timeList.get((int)numberOfTransactions / 2);

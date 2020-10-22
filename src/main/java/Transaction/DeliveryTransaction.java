@@ -14,7 +14,7 @@ public class DeliveryTransaction {
 
     Integer serverId;
 
-    public void transactionThree(int W_ID, int CARRIER_ID, Integer serverId){
+    public void processDeliveryTransaction(int W_ID, int CARRIER_ID, Integer serverId){
         this.serverId = serverId;
         Framework framework = Framework.getInstance(serverId);
         Session session = framework.getSession();
@@ -53,7 +53,7 @@ public class DeliveryTransaction {
         sumOfOrderLineAmountList = (List<Double>) session.createNativeQuery(sumOfOrderLineAmountQueryBuilder.toString()).getResultList();
 
         for(int i=1;i<=10;i++){
-
+            System.out.println("Processing oldest yet-to-be-delivered order for district number: " + i);
             int o_id = smallestOrderNumber.get(i-1);
             //b
             Query updateCarrierId = session.createNativeQuery(String.format("UPDATE orders SET o_carrier_id = %s WHERE o_id = %d AND o_w_id = %d AND o_d_id = %d", "'" + CARRIER_ID +"'", o_id, W_ID, i));
@@ -77,6 +77,7 @@ public class DeliveryTransaction {
             updateCustomer.setParameter("c_id", customerOfSmallestOrderNumber.get(i-1));
             updateCustomer.executeUpdate();
         }
+        System.out.println("-----Completed Delivery transaction-----");
         framework.commitTransaction(transaction);
     }
 

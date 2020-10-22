@@ -6,4 +6,5 @@ public class FileParserOutput {
     Double medianTransactionLatency;
     Double ninetyFifthPercentileLatency;
     Double ninetyNinthPercentageLatency;
+    int[] transactionCounts;
 }

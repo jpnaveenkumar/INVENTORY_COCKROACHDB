@@ -9,7 +9,7 @@ import java.time.Instant;
 
 public class PaymentTransaction {
         Integer serverId;
-        public PaymentTransactionOutput transactionTwo(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Integer serverId){
+        public PaymentTransactionOutput processPaymentTransaction(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Integer serverId){
             this.serverId = serverId;
             PaymentTransactionOutput paymentTransactionOutput = new PaymentTransactionOutput();
             Framework framework = Framework.getInstance(serverId);
@@ -83,7 +83,7 @@ public class PaymentTransaction {
         }
 
     public void printOutput(PaymentTransactionOutput output){
-        System.out.println("-------------Transaction 2 has ended; Showing outputs below-------------");
+        System.out.println("-------------Output of Payment Transaction-------------");
         System.out.println("C_W_ID: " + output.C_W_ID);
         System.out.println("C_D_ID: " + output.C_D_ID);
         System.out.println("C_ID: " + output.C_ID);
@@ -115,22 +115,6 @@ public class PaymentTransaction {
         System.out.println("D_ZIP: " + output.D_ZIP);
 
         System.out.println("PAYMENT: " + output.PAYMENT);
-    }
-
-
-
-    public static void main(String args[]) {
-        PaymentTransaction t2 = new PaymentTransaction();
-        Framework framework = Framework.getInstance(0);
-        framework.initHibernate(); // Initializing Hibernate
-        Instant start = Instant.now();
-        PaymentTransactionOutput output = t2.transactionTwo(5, 5, 5,1.0, 0);
-        Instant end = Instant.now();    //calculating end time
-        Duration timeElapsed = Duration.between(start, end);
-        t2.printOutput(output);
-        System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
-        System.out.println("-------------DONE-------------");
-        framework.destroy(); // Graceful shutdown of Hibernate
     }
 }
 

@@ -15,7 +15,7 @@ public class DatabaseState {
         this.framework = Framework.getInstance(0);
         this.session = this.framework.getSession();
     }
-    
+
     public List<String> outputDatabaseState(int i){
         List<String> output = new ArrayList<>();
         output.add(String.valueOf(i));
@@ -63,5 +63,6 @@ public class DatabaseState {
 
         return output;
     }
+
 
 }

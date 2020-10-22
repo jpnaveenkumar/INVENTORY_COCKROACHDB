@@ -81,7 +81,7 @@ public class PopularItemTransaction {
         List<Object> objects = query.getResultList();
         Map<Integer,Order> orders = new HashMap<>();
         Set<Integer> itemIdSet = new HashSet<>();
-        System.out.println(objects);
+        //System.out.println(objects);
         //Map<Integer, Integer> verification = new HashMap<>();
         for(Object itr : objects){
             Object object[] = (Object[]) itr;

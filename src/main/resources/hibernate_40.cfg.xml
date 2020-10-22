@@ -13,12 +13,12 @@
         <property name="connection.password"></property>
 
         <!-- Required so a table can be created from the 'Account' class in Sample.java -->
-        <property name="hibernate.hbm2ddl.auto">create</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.hbm2ddl.import_files">
             /script.sql
         </property>
         <!-- Optional: Show SQL output for debugging -->
-        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.show_sql">false</property>
         <property name="hibernate.format_sql">true</property>
     </session-factory>
 </hibernate-configuration>
