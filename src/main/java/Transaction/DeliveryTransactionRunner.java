@@ -1,5 +1,6 @@
 package Transaction;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
@@ -8,29 +9,25 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 class DeliveryTransactionExecutor extends Thread {
     int W_ID;
     int D_ID;
     int CARRIER_ID;
-    Framework framework;
-    Session session;
     int serverId;
     CountDownLatch latch;
-
+    static Logger log = Logger.getLogger(DeliveryTransactionExecutor.class.getName());
     public DeliveryTransactionExecutor(int W_ID, int D_ID, int CARRIER_ID, int serverId, CountDownLatch latch){
         this.W_ID = W_ID;
         this.D_ID = D_ID;
         this.CARRIER_ID = CARRIER_ID;
-        this.framework = Framework.getInstance(serverId);
-        this.session = this.framework.getSession();
         this.serverId = serverId;
         this.latch = latch;
 
     }
-    public void processDeliveryTransactionRunner(){
-        Transaction transaction = framework.startTransaction();
+    public void processDeliveryTransactionRunner(Session session){
         String selectSmallerOrderIDQuery = String.format("(select o_id, o_c_id from orders where o_w_id = %d and o_d_id = %d and o_carrier_id = %s order by o_id limit 1)", W_ID, this.D_ID , "'" + null + "'");
         Query q0 = session.createNativeQuery(selectSmallerOrderIDQuery);
         Object[] o_obj = (Object[])q0.getSingleResult();
@@ -59,15 +56,44 @@ class DeliveryTransactionExecutor extends Thread {
         updateCustomer.setParameter("i", D_ID);
         updateCustomer.setParameter("c_id", o_c_id);
         updateCustomer.executeUpdate();
-        framework.commitTransaction(transaction);
-        latch.countDown();
     }
     public void run(){
-        processDeliveryTransactionRunner();
+        int currentTransactionRetryCount = 0;
+        Session session = null;
+        Integer transactionRetryThreshold = 30;
+        Transaction transaction = null;
+        while (currentTransactionRetryCount < transactionRetryThreshold){
+            try{
+                Framework framework = Framework.getInstance(serverId);
+                session = framework.getSession();
+                currentTransactionRetryCount++;
+                transaction = framework.startTransaction();
+                processDeliveryTransactionRunner(session);
+                transaction.commit();
+                latch.countDown();
+                System.out.println("Committing transaction successfully with retry count : "+currentTransactionRetryCount);
+                break;
+            }catch (Exception e){
+                log.error("Error occurred while committing delivery transaction retry count :"+currentTransactionRetryCount + Thread.currentThread().getName(), e);
+                System.out.println("Error occurred while delivery committing transaction retry count : "+currentTransactionRetryCount + Thread.currentThread().getName());
+                if(currentTransactionRetryCount == transactionRetryThreshold){
+                    latch.countDown();
+                }
+                try {
+                    int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
+                    Thread.sleep(sleepMillis);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
+//                if(transaction != null) transaction.rollback();
+//                if(session != null) session.close();
+            }
+        }
     }
 }
 
 public class DeliveryTransactionRunner{
+
     public void processDeliveryTransaction(int W_ID, int CARRIER_ID, int serverId) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(10);
         for(int districtNumber = 1; districtNumber <= 10; districtNumber++){

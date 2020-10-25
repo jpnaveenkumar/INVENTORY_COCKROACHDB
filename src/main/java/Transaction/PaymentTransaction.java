@@ -1,20 +1,52 @@
 package Transaction;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
+import java.util.Random;
 
 public class PaymentTransaction {
         Integer serverId;
-        public PaymentTransactionOutput processPaymentTransaction(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Integer serverId){
+        static Logger log = Logger.getLogger(PaymentTransaction.class.getName());
+        public PaymentTransactionOutput processPaymentTransactionManager(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Integer serverId){
             this.serverId = serverId;
+            int currentTransactionRetryCount = 0;
             PaymentTransactionOutput paymentTransactionOutput = new PaymentTransactionOutput();
-            Framework framework = Framework.getInstance(serverId);
-            Session session = framework.getSession();
-            Transaction transaction = framework.startTransaction();
+            Session session = null;
+            Transaction transaction = null;
+            while (currentTransactionRetryCount < 30){
+                try{
+                    Framework framework = Framework.getInstance(serverId);
+                    session = framework.getSession();
+                    currentTransactionRetryCount++;
+                    transaction = framework.startTransaction();
+                    paymentTransactionOutput = processPaymentTransaction(C_W_ID, C_D_ID, C_ID, PAYMENT, session);
+                    transaction.commit();
+                    System.out.println("Committing transaction successfully with retry count : "+currentTransactionRetryCount);
+                    break;
+                }catch (Exception e){
+                    log.error("Error occurred while committing payment transaction retry count :"+currentTransactionRetryCount + Thread.currentThread().getName(), e);
+                    System.out.println("Error occurred while committing payment transaction retry count : "+currentTransactionRetryCount + Thread.currentThread().getName());
+                    try {
+                        int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
+                        Thread.sleep(sleepMillis);
+                    } catch (InterruptedException interruptedException) {
+                        interruptedException.printStackTrace();
+                    }
+//                    if(transaction != null) transaction.rollback();
+//                    if(session != null) session.close();
+                }
+            }
+            return paymentTransactionOutput;
+        }
+
+        public PaymentTransactionOutput processPaymentTransaction(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Session session){
+            PaymentTransactionOutput paymentTransactionOutput = new PaymentTransactionOutput();
 
             Query updateWareHouse = session.createNativeQuery("UPDATE warehouse set W_YTD = W_YTD + :payment WHERE W_ID = :c_w_id");
             updateWareHouse.setParameter("payment", PAYMENT);
@@ -78,7 +110,6 @@ public class PaymentTransaction {
 
             paymentTransactionOutput.PAYMENT = PAYMENT;
 
-            framework.commitTransaction(transaction);
             return paymentTransactionOutput;
         }
 

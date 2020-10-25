@@ -23,7 +23,7 @@ class TestCaseManager extends Thread {
     //runs for each client
     public void run() {
         System.out.println(this.testCaseFileName + " has started executing....");
-        FileParserOutput fp = this.fileParser.parseInputFile(this.testCaseFileName, this.testCaseFileName, this.serverId);
+        FileParserOutput fp = this.fileParser.parseInputFile(this.testCaseFileName, this.testCaseFileName, this.serverId, this.countDownLatch);
         fileParserOutputs[this.clientNumber] = fp;
         this.countDownLatch.countDown();
     }
@@ -32,16 +32,16 @@ class TestCaseManager extends Thread {
 
 public class Driver {
 
-    Integer numberOfClients = 2;
+    Integer numberOfClients = 5;
     Integer numberOfServers = 5;
     Integer experimentNumber = 5;
 
     DatabaseState databaseState = new DatabaseState();
 
     void init() throws IOException, InterruptedException {
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        for(int clientNumber = 2; clientNumber <= numberOfClients; clientNumber++){
-            String fileName = "xact-files/"+41+".txt";
+        CountDownLatch countDownLatch = new CountDownLatch(numberOfClients);
+        for(int clientNumber = 1; clientNumber <= numberOfClients; clientNumber++){
+            String fileName = "xact-files/"+clientNumber+".txt";
             Integer serverId = clientNumber % numberOfServers;
             TestCaseManager testCaseManager = new TestCaseManager(fileName, serverId, clientNumber, countDownLatch);
             testCaseManager.start();
