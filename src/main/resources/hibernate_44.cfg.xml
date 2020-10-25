@@ -11,7 +11,7 @@
         <property name="connection.url">jdbc:postgresql://xcnc44.comp.nus.edu.sg:30000/test?sslmode=disable</property>
         <property name="connection.username">root</property>
         <property name="connection.password"></property>
-
+        <property name="connection.pool_size">400</property>
         <!-- Required so a table can be created from the 'Account' class in Sample.java -->
         <property name="hibernate.hbm2ddl.auto">update</property>
         <property name="hibernate.hbm2ddl.import_files">

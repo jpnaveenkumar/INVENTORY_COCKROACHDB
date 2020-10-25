@@ -1,5 +1,6 @@
 package Transaction;
 
+import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
@@ -7,17 +8,48 @@ import org.hibernate.query.Query;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 public class NewOrderTransaction {
     int queryCount = 0;
     Integer serverId;
-    public NewOrderTransactionOutput processNewOrderTransaction(int C_ID, int W_ID, int D_ID, int num_items, List<NewOrderTransactionInput> inputList, Integer serverId){
+    static Logger log = Logger.getLogger(NewOrderTransaction.class.getName());
+    public NewOrderTransactionOutput processNewOrderTransactionManager(int C_ID, int W_ID, int D_ID, int num_items, List<NewOrderTransactionInput> inputList, Integer serverId){
+        this.serverId = serverId;
+        int currentTransactionRetryCount = 0;
+        NewOrderTransactionOutput newOrderTransactionOutput = new NewOrderTransactionOutput();
+        Session session = null;
+        Transaction transaction = null;
+        while (currentTransactionRetryCount < 30){
+            try{
+                Framework framework = Framework.getInstance(serverId);
+                session = framework.getSession();
+                currentTransactionRetryCount++;
+                transaction = framework.startTransaction();
+                newOrderTransactionOutput = processNewOrderTransaction(C_ID, W_ID, D_ID, num_items, inputList, session);
+                transaction.commit();
+                System.out.println("Committing transaction successfully with retry count : "+currentTransactionRetryCount);
+                break;
+            }catch (Exception e){
+                log.error("Error occurred while committing neworder transaction retry count :"+currentTransactionRetryCount + Thread.currentThread().getName(), e);
+                System.out.println("Error occurred while committing neworder transaction retry count : "+currentTransactionRetryCount + Thread.currentThread().getName());
+                try {
+                    int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
+                    Thread.sleep(sleepMillis);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
+//                if(transaction != null) transaction.rollback();
+//                if(session != null) session.close();
+            }
+        }
+        return newOrderTransactionOutput;
+    }
+
+    private NewOrderTransactionOutput processNewOrderTransaction(int C_ID, int W_ID, int D_ID, int num_items, List<NewOrderTransactionInput> inputList, Session session){
 
         //Note : Numbers or alphabet comments above a sequence of code lines indicate which part of problem statement it is related to. Refer section 2.1, Processing steps in project document.
-        this.serverId = serverId;
-        Framework framework = Framework.getInstance(serverId);
-        Session session = framework.getSession();
-        Transaction transaction = framework.startTransaction();
+
 
         //List<T1Input> inputList = new ArrayList<T1Input>();
         NewOrderTransactionOutput newOrderTransactionOutput = new NewOrderTransactionOutput();
@@ -175,7 +207,6 @@ public class NewOrderTransaction {
         newOrderTransactionOutput.TOTAL_AMOUNT = totalAmount;
         newOrderTransactionOutput.itemOutputs = itemOutputs;
 
-        framework.commitTransaction(transaction);
         return newOrderTransactionOutput;
     }
 
@@ -201,15 +232,17 @@ public class NewOrderTransaction {
         System.out.println("O_ENTRY_D: " + output.O_ENTRY_D);
         System.out.println("NUM_ITEMS: " + output.NUM_ITEMS);
         System.out.println("TOTAL_AMOUNT: " + output.TOTAL_AMOUNT);
-        for(ItemOutput itemOutput : output.itemOutputs){
-            System.out.println("\n");
-            System.out.println("ITEM_NUMBER: " + itemOutput.ITEM_NUMBER);
-            System.out.println("I_NAME: " + itemOutput.I_NAME);
-            System.out.println("SUPPLIER_WAREHOUSE: " + itemOutput.SUPPLIER_WAREHOUSE);
-            System.out.println("QUANTITY: " + itemOutput.QUANTITY);
-            System.out.println("OL_AMOUNT: " + itemOutput.OL_AMOUNT);
-            System.out.println("S_QUANTITY: " + itemOutput.S_QUANTITY);
-        }
+        try {
+            for (ItemOutput itemOutput : output.itemOutputs) {
+                System.out.println("\n");
+                System.out.println("ITEM_NUMBER: " + itemOutput.ITEM_NUMBER);
+                System.out.println("I_NAME: " + itemOutput.I_NAME);
+                System.out.println("SUPPLIER_WAREHOUSE: " + itemOutput.SUPPLIER_WAREHOUSE);
+                System.out.println("QUANTITY: " + itemOutput.QUANTITY);
+                System.out.println("OL_AMOUNT: " + itemOutput.OL_AMOUNT);
+                System.out.println("S_QUANTITY: " + itemOutput.S_QUANTITY);
+            }
+        }catch (Exception e){ }
     }
 }
 

@@ -15,6 +15,7 @@ public class Framework {
     private static SessionFactory sessionFactory_43;
     private static SessionFactory sessionFactory_44;
     private Session session;
+    private Integer currentTransactionRetryCount = 0;
     private Integer serverId;
 
     private Framework(Integer serverId){
@@ -48,7 +49,14 @@ public class Framework {
     }
 
     public void commitTransaction(Transaction transaction) {
-        transaction.commit();
+        try {
+            //System.out.println("Transaction commit tries count : "+ currentTransactionRetryCount);
+            transaction.commit();
+            //System.out.println("Transaction committed successfully with tries count : "+ currentTransactionRetryCount);
+        } catch (Exception e) {
+            transaction.rollback();
+            //e.printStackTrace();
+        }
         this.session.close();
     }
 

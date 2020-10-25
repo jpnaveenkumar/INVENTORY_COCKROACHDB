@@ -1,4 +1,5 @@
 import Transaction.*;
+import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -8,9 +9,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class FileParser {
-    public FileParserOutput parseInputFile(String fileURI, String testCaseFileName, Integer serverId)
+    static Logger log = Logger.getLogger(FileParser.class.getName());
+    public FileParserOutput parseInputFile(String fileURI, String testCaseFileName, Integer serverId, CountDownLatch countDownLatch)
     {
         FileParserOutput fileParserOutput = new FileParserOutput();
         List<Double> timeList = new ArrayList<>();
@@ -38,7 +41,7 @@ public class FileParser {
                                     Integer.parseInt(itemInfo[2])));
                         }
                         NewOrderTransaction newOrderTransaction = new NewOrderTransaction();
-                        newOrderTransaction.printOutput(newOrderTransaction.processNewOrderTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                        newOrderTransaction.printOutput(newOrderTransaction.processNewOrderTransactionManager(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
                                 Integer.parseInt(input[3]), numberOfItems, newOrderTransactionInputs, serverId));
                         break;
                     }
@@ -46,7 +49,7 @@ public class FileParser {
                         System.out.println("-----Payment Transaction-----");
                         transactionCounts[1]++;
                         PaymentTransaction paymentTransaction = new PaymentTransaction();
-                        paymentTransaction.printOutput(paymentTransaction.processPaymentTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                        paymentTransaction.printOutput(paymentTransaction.processPaymentTransactionManager(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
                                 Integer.parseInt(input[3]), Double.parseDouble(input[4]), serverId));
                         break;
                     }
@@ -66,7 +69,9 @@ public class FileParser {
                                 Integer.parseInt(input[3]),
                                 serverId
                         );
-                        orderStatusTransaction.getOrderStatus();
+                        try{
+                            orderStatusTransaction.getOrderStatus();
+                        }catch (Exception e){}
                         break;
                     }
                     case "S":{
@@ -79,7 +84,9 @@ public class FileParser {
                                 Integer.parseInt(input[4]),
                                 serverId
                         );
-                        stockLevelTransaction.performStockLevelTransaction();
+                        try{
+                            stockLevelTransaction.performStockLevelTransaction();
+                        }catch (Exception e){}
                         break;
                     }
                     case "I":{
@@ -91,14 +98,18 @@ public class FileParser {
                                 Integer.parseInt(input[3]),
                                 serverId
                         );
-                        popularItemTransaction.findPopulartItemsInLastLOrders();
+                        try{
+                            popularItemTransaction.findPopulartItemsInLastLOrders();
+                        }catch (Exception e){}
                         break;
                     }
                     case "T":{
                         transactionCounts[6]++;
                         System.out.println("-----Top Balance Transaction-----");
                         TopBalanceTransaction topBalanceTransaction = new TopBalanceTransaction();
-                        topBalanceTransaction.printOutPut(topBalanceTransaction.transactionSeven(serverId));
+                        try{
+                            topBalanceTransaction.printOutPut(topBalanceTransaction.transactionSeven(serverId));
+                        }catch (Exception e){}
                         break;
                     }
                     case "R":{
@@ -110,7 +121,9 @@ public class FileParser {
                                 Integer.parseInt(input[2]),
                                 serverId
                         );
-                        relatedCustomerTransaction.findRelatedCustomers();
+                        try{
+                            relatedCustomerTransaction.findRelatedCustomers();
+                        }catch (Exception e){}
                         break;
                     }
                 }
@@ -121,8 +134,12 @@ public class FileParser {
                 totalExecutionTime += timeTakenForThisTransaction;
                 numberOfTransactions++;
                 System.out.println("Completed Transaction " + numberOfTransactions + " in " + timeTakenForThisTransaction + " seconds");
+                System.out.println("Thread count : "+ Thread.activeCount());
+                System.out.println("CountDown Latch count : "+ countDownLatch.getCount());
             }
         }catch (Exception e){
+            log.error("Failed during file parsing", e);
+            System.out.println("Failed during file parsing");
             e.printStackTrace();
         }
         fileParserOutput.numberOfTransactions = numberOfTransactions;
