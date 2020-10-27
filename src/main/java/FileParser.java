@@ -27,7 +27,7 @@ public class FileParser {
             while ((line = bufferedReader.readLine())!= null){
                 System.out.println("line: " + line);
                 String[] input =  line.split(",");
-                Instant startTime = Instant.now();
+                double timeTakenForCurrentTransaction = 0.0;
                 switch (input[0]){
                     case "N":{
                         System.out.println("-----New Order Transaction-----");
@@ -41,28 +41,38 @@ public class FileParser {
                                     Integer.parseInt(itemInfo[2])));
                         }
                         NewOrderTransaction newOrderTransaction = new NewOrderTransaction();
-                        newOrderTransaction.printOutput(newOrderTransaction.processNewOrderTransactionManager(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
-                                Integer.parseInt(input[3]), numberOfItems, newOrderTransactionInputs, serverId));
+                        Double timeTaken = newOrderTransaction.processNewOrderTransactionManager(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                                Integer.parseInt(input[3]), numberOfItems, newOrderTransactionInputs, serverId);
+                        timeList.add(timeTaken);
+                        totalExecutionTime += timeTaken;
+                        timeTakenForCurrentTransaction = timeTaken;
                         break;
                     }
                     case "P":{
                         System.out.println("-----Payment Transaction-----");
                         transactionCounts[1]++;
                         PaymentTransaction paymentTransaction = new PaymentTransaction();
-                        paymentTransaction.printOutput(paymentTransaction.processPaymentTransactionManager(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
-                                Integer.parseInt(input[3]), Double.parseDouble(input[4]), serverId));
+                        Double timeTaken = paymentTransaction.processPaymentTransactionManager(Integer.parseInt(input[1]), Integer.parseInt(input[2]),
+                                Integer.parseInt(input[3]), Double.parseDouble(input[4]), serverId);
+                        timeList.add(timeTaken);
+                        totalExecutionTime += timeTaken;
+                        timeTakenForCurrentTransaction = timeTaken;
                         break;
                     }
                     case "D":{
                         System.out.println("-----Delivery Transaction-----");
                         transactionCounts[2]++;
                         DeliveryTransactionRunner deliveryTransactionRunner = new DeliveryTransactionRunner();
-                        deliveryTransactionRunner.processDeliveryTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]), serverId);
+                        Double timeTaken = deliveryTransactionRunner.processDeliveryTransaction(Integer.parseInt(input[1]), Integer.parseInt(input[2]), serverId);
+                        timeList.add(timeTaken);
+                        totalExecutionTime += timeTaken;
+                        timeTakenForCurrentTransaction = timeTaken;
                         break;
                     }
                     case "O":{
                         System.out.println("-----Order Status Transaction-----");
                         transactionCounts[3]++;
+                        Instant startTime = Instant.now();
                         OrderStatusTransaction orderStatusTransaction = new OrderStatusTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[2]),
@@ -71,12 +81,19 @@ public class FileParser {
                         );
                         try{
                             orderStatusTransaction.getOrderStatus();
+                            Instant endTime = Instant.now();
+                            Duration timeElapsed = Duration.between(startTime, endTime);
+                            Double timeTakenForThisTransaction = (double) timeElapsed.toMillis() / 1000;
+                            timeList.add(timeTakenForThisTransaction);
+                            totalExecutionTime += timeTakenForThisTransaction;
+                            timeTakenForCurrentTransaction = timeTakenForThisTransaction;
                         }catch (Exception e){}
                         break;
                     }
                     case "S":{
                         System.out.println("-----Stock Level Transaction-----");
                         transactionCounts[4]++;
+                        Instant startTime = Instant.now();
                         StockLevelTransaction stockLevelTransaction = new StockLevelTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[2]),
@@ -86,12 +103,19 @@ public class FileParser {
                         );
                         try{
                             stockLevelTransaction.performStockLevelTransaction();
+                            Instant endTime = Instant.now();
+                            Duration timeElapsed = Duration.between(startTime, endTime);
+                            Double timeTakenForThisTransaction = (double) timeElapsed.toMillis() / 1000;
+                            timeList.add(timeTakenForThisTransaction);
+                            totalExecutionTime += timeTakenForThisTransaction;
+                            timeTakenForCurrentTransaction = timeTakenForThisTransaction;
                         }catch (Exception e){}
                         break;
                     }
                     case "I":{
                         transactionCounts[5]++;
                         System.out.println("-----Popular Item Transaction-----");
+                        Instant startTime = Instant.now();
                         PopularItemTransaction popularItemTransaction = new PopularItemTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[2]),
@@ -100,21 +124,35 @@ public class FileParser {
                         );
                         try{
                             popularItemTransaction.findPopulartItemsInLastLOrders();
+                            Instant endTime = Instant.now();
+                            Duration timeElapsed = Duration.between(startTime, endTime);
+                            Double timeTakenForThisTransaction = (double) timeElapsed.toMillis() / 1000;
+                            timeList.add(timeTakenForThisTransaction);
+                            totalExecutionTime += timeTakenForThisTransaction;
+                            timeTakenForCurrentTransaction = timeTakenForThisTransaction;
                         }catch (Exception e){}
                         break;
                     }
                     case "T":{
                         transactionCounts[6]++;
                         System.out.println("-----Top Balance Transaction-----");
+                        Instant startTime = Instant.now();
                         TopBalanceTransaction topBalanceTransaction = new TopBalanceTransaction();
                         try{
                             topBalanceTransaction.printOutPut(topBalanceTransaction.transactionSeven(serverId));
+                            Instant endTime = Instant.now();
+                            Duration timeElapsed = Duration.between(startTime, endTime);
+                            Double timeTakenForThisTransaction = (double) timeElapsed.toMillis() / 1000;
+                            timeList.add(timeTakenForThisTransaction);
+                            totalExecutionTime += timeTakenForThisTransaction;
+                            timeTakenForCurrentTransaction = timeTakenForThisTransaction;
                         }catch (Exception e){}
                         break;
                     }
                     case "R":{
                         System.out.println("-----Related Customer Transaction-----");
                         transactionCounts[7]++;
+                        Instant startTime = Instant.now();
                         RelatedCustomerTransaction relatedCustomerTransaction = new RelatedCustomerTransaction(
                                 Integer.parseInt(input[1]),
                                 Integer.parseInt(input[3]),
@@ -123,17 +161,18 @@ public class FileParser {
                         );
                         try{
                             relatedCustomerTransaction.findRelatedCustomers();
+                            Instant endTime = Instant.now();
+                            Duration timeElapsed = Duration.between(startTime, endTime);
+                            Double timeTakenForThisTransaction = (double) timeElapsed.toMillis() / 1000;
+                            timeList.add(timeTakenForThisTransaction);
+                            totalExecutionTime += timeTakenForThisTransaction;
+                            timeTakenForCurrentTransaction = timeTakenForThisTransaction;
                         }catch (Exception e){}
                         break;
                     }
                 }
-                Instant endTime = Instant.now();
-                Duration timeElapsed = Duration.between(startTime, endTime);
-                Double timeTakenForThisTransaction = (double) timeElapsed.toMillis() / 1000;
-                timeList.add(timeTakenForThisTransaction);
-                totalExecutionTime += timeTakenForThisTransaction;
                 numberOfTransactions++;
-                System.out.println("Completed Transaction " + numberOfTransactions + " in " + timeTakenForThisTransaction + " seconds");
+                System.out.println("Completed Transaction " + numberOfTransactions + " in " + timeTakenForCurrentTransaction + " seconds");
                 System.out.println("Thread count : "+ Thread.activeCount());
                 System.out.println("CountDown Latch count : "+ countDownLatch.getCount());
             }

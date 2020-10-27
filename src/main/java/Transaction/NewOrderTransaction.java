@@ -5,6 +5,8 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,13 +16,15 @@ public class NewOrderTransaction {
     int queryCount = 0;
     Integer serverId;
     static Logger log = Logger.getLogger(NewOrderTransaction.class.getName());
-    public NewOrderTransactionOutput processNewOrderTransactionManager(int C_ID, int W_ID, int D_ID, int num_items, List<NewOrderTransactionInput> inputList, Integer serverId){
+    public Double processNewOrderTransactionManager(int C_ID, int W_ID, int D_ID, int num_items, List<NewOrderTransactionInput> inputList, Integer serverId){
         this.serverId = serverId;
+        Double timeTaken = 0.0;
         int currentTransactionRetryCount = 0;
         NewOrderTransactionOutput newOrderTransactionOutput = new NewOrderTransactionOutput();
         Session session = null;
         Transaction transaction = null;
         while (currentTransactionRetryCount < 30){
+            Instant startTime = Instant.now();
             try{
                 Framework framework = Framework.getInstance(serverId);
                 session = framework.getSession();
@@ -28,13 +32,18 @@ public class NewOrderTransaction {
                 transaction = framework.startTransaction();
                 newOrderTransactionOutput = processNewOrderTransaction(C_ID, W_ID, D_ID, num_items, inputList, session);
                 transaction.commit();
+                Instant endTime = Instant.now();
+                printOutput(newOrderTransactionOutput);
+                Duration timeElapsed = Duration.between(startTime, endTime);
+                timeTaken = (double) timeElapsed.toMillis() / 1000;
                 System.out.println("Committing transaction successfully with retry count : "+currentTransactionRetryCount);
                 break;
             }catch (Exception e){
                 log.error("Error occurred while committing neworder transaction retry count :"+currentTransactionRetryCount + Thread.currentThread().getName(), e);
                 System.out.println("Error occurred while committing neworder transaction retry count : "+currentTransactionRetryCount + Thread.currentThread().getName());
                 try {
-                    int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
+                    //int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
+                    int sleepMillis = (int)(Math.pow(2, Math.min(currentTransactionRetryCount,11)) * 100) + new Random().nextInt(100);
                     Thread.sleep(sleepMillis);
                 } catch (InterruptedException interruptedException) {
                     interruptedException.printStackTrace();
@@ -43,7 +52,7 @@ public class NewOrderTransaction {
 //                if(session != null) session.close();
             }
         }
-        return newOrderTransactionOutput;
+        return timeTaken;
     }
 
     private NewOrderTransactionOutput processNewOrderTransaction(int C_ID, int W_ID, int D_ID, int num_items, List<NewOrderTransactionInput> inputList, Session session){

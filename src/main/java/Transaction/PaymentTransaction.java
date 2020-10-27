@@ -7,19 +7,22 @@ import org.hibernate.query.Query;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
 public class PaymentTransaction {
         Integer serverId;
         static Logger log = Logger.getLogger(PaymentTransaction.class.getName());
-        public PaymentTransactionOutput processPaymentTransactionManager(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Integer serverId){
+        public Double processPaymentTransactionManager(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Integer serverId){
             this.serverId = serverId;
+            Double timeTaken = 0.0;
             int currentTransactionRetryCount = 0;
             PaymentTransactionOutput paymentTransactionOutput = new PaymentTransactionOutput();
             Session session = null;
             Transaction transaction = null;
             while (currentTransactionRetryCount < 30){
+                Instant startTime = Instant.now();
                 try{
                     Framework framework = Framework.getInstance(serverId);
                     session = framework.getSession();
@@ -28,12 +31,18 @@ public class PaymentTransaction {
                     paymentTransactionOutput = processPaymentTransaction(C_W_ID, C_D_ID, C_ID, PAYMENT, session);
                     transaction.commit();
                     System.out.println("Committing transaction successfully with retry count : "+currentTransactionRetryCount);
+                    Instant endTime = Instant.now();
+                    printOutput(paymentTransactionOutput);
+                    Duration timeElapsed = Duration.between(startTime, endTime);
+                    Double timeTakenForThisTransaction = (double) timeElapsed.toMillis() / 1000;
+                    timeTaken = timeTakenForThisTransaction;
                     break;
                 }catch (Exception e){
                     log.error("Error occurred while committing payment transaction retry count :"+currentTransactionRetryCount + Thread.currentThread().getName(), e);
                     System.out.println("Error occurred while committing payment transaction retry count : "+currentTransactionRetryCount + Thread.currentThread().getName());
                     try {
-                        int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
+                        //int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
+                        int sleepMillis = (int)(Math.pow(2, Math.min(currentTransactionRetryCount,11)) * 100) + new Random().nextInt(100);
                         Thread.sleep(sleepMillis);
                     } catch (InterruptedException interruptedException) {
                         interruptedException.printStackTrace();
@@ -42,7 +51,7 @@ public class PaymentTransaction {
 //                    if(session != null) session.close();
                 }
             }
-            return paymentTransactionOutput;
+            return timeTaken;
         }
 
         public PaymentTransactionOutput processPaymentTransaction(int C_W_ID, int C_D_ID, int C_ID, double PAYMENT, Session session){

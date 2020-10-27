@@ -17,6 +17,7 @@ class DeliveryTransactionExecutor extends Thread {
     int D_ID;
     int CARRIER_ID;
     int serverId;
+    static Double timeTakenSoFar = 0.0;
     CountDownLatch latch;
     static Logger log = Logger.getLogger(DeliveryTransactionExecutor.class.getName());
     public DeliveryTransactionExecutor(int W_ID, int D_ID, int CARRIER_ID, int serverId, CountDownLatch latch){
@@ -60,9 +61,11 @@ class DeliveryTransactionExecutor extends Thread {
     public void run(){
         int currentTransactionRetryCount = 0;
         Session session = null;
+        Double timeTaken = 0.0;
         Integer transactionRetryThreshold = 30;
         Transaction transaction = null;
         while (currentTransactionRetryCount < transactionRetryThreshold){
+            Instant startTime = Instant.now();
             try{
                 Framework framework = Framework.getInstance(serverId);
                 session = framework.getSession();
@@ -70,6 +73,10 @@ class DeliveryTransactionExecutor extends Thread {
                 transaction = framework.startTransaction();
                 processDeliveryTransactionRunner(session);
                 transaction.commit();
+                Instant endTime = Instant.now();
+                Duration timeElapsed = Duration.between(startTime, endTime);
+                timeTaken = (double) timeElapsed.toMillis() / 1000;
+                timeTakenSoFar = timeTakenSoFar + timeTaken;
                 latch.countDown();
                 System.out.println("Committing transaction successfully with retry count : "+currentTransactionRetryCount);
                 break;
@@ -80,7 +87,8 @@ class DeliveryTransactionExecutor extends Thread {
                     latch.countDown();
                 }
                 try {
-                    int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
+                    //int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
+                    int sleepMillis = (int)(Math.pow(2, Math.min(currentTransactionRetryCount,11)) * 100) + new Random().nextInt(100);
                     Thread.sleep(sleepMillis);
                 } catch (InterruptedException interruptedException) {
                     interruptedException.printStackTrace();
@@ -94,13 +102,14 @@ class DeliveryTransactionExecutor extends Thread {
 
 public class DeliveryTransactionRunner{
 
-    public void processDeliveryTransaction(int W_ID, int CARRIER_ID, int serverId) throws InterruptedException {
+    public Double processDeliveryTransaction(int W_ID, int CARRIER_ID, int serverId) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(10);
         for(int districtNumber = 1; districtNumber <= 10; districtNumber++){
             DeliveryTransactionExecutor deliveryTransactionExecutor = new DeliveryTransactionExecutor(W_ID, districtNumber, CARRIER_ID, serverId, latch);
             deliveryTransactionExecutor.start();
         }
         latch.await();
+        return DeliveryTransactionExecutor.timeTakenSoFar;
     }
 
 //    public static void main(String[] args) throws InterruptedException {
