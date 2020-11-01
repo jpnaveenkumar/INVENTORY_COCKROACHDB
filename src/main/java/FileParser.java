@@ -1,6 +1,5 @@
 import Transaction.*;
 import org.apache.log4j.Logger;
-import org.apache.log4j.Priority;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

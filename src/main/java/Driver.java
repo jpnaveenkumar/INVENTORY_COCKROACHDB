@@ -2,6 +2,9 @@ import Transaction.DatabaseState;
 import Transaction.Framework;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -58,6 +61,9 @@ public class Driver {
 
     void init() throws IOException, InterruptedException {
         /* serverId from 1 to 5 */
+        CSVWriter csvWriter = new CSVWriter();
+        System.out.println("Saving database state before execution...");
+        csvWriter.writeToDBStateCSV(databaseState.outputDatabaseState(experimentNumber), "before");
         System.out.println("Starting to process.......");
         int numberOfFiles = this.experimentNumberVsNumberOfClients.get(experimentNumber);
         int numberOfServers = this.experimentNumberVsNumberOfServers.get(experimentNumber);
@@ -70,9 +76,10 @@ public class Driver {
             clientNumber = clientNumber + numberOfServers;
         }
         countDownLatch.await();
-        CSVWriter csvWriter = new CSVWriter();
-        csvWriter.writeToFile(databaseState.outputDatabaseState(experimentNumber));
+        System.out.println("Saving database state after execution... \n");
+        csvWriter.writeToDBStateCSV(databaseState.outputDatabaseState(experimentNumber), "after");
         csvWriter.writeClientOutputToCSV(TestCaseManager.fileParserOutputs);
+        csvWriter.writeThroughputMetricsToCSV(experimentNumber, TestCaseManager.fileParserOutputs);
     }
 
     static void readInputFromConsole()
@@ -101,6 +108,11 @@ public class Driver {
         framework.initHibernate(refreshDatabase);
         Driver driver = new Driver();
         driver.init();
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        System.out.println("Completed at time " + dateFormat.format(date));
+
         framework.destroy();
     }
 }
