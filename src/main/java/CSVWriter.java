@@ -25,7 +25,7 @@ public class CSVWriter {
             if(fpo!=null){
                 numberOfClients++;
                 minThroughput = Math.min(minThroughput, fpo.transactionThroughput);
-                maxThroughput = Math.min(maxThroughput, fpo.transactionThroughput);
+                maxThroughput = Math.max(maxThroughput, fpo.transactionThroughput);
                 sumThroughput += fpo.transactionThroughput;
             }
         }
