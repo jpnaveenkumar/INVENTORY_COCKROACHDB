@@ -7,11 +7,11 @@
         <!-- Database connection settings -->
         <property name="connection.driver_class">org.postgresql.Driver</property>
         <property name="dialect">org.hibernate.dialect.CockroachDB201Dialect</property>
-        <property name="connection.url">jdbc:postgresql://localhost:26257/test?sslmode=disable</property>
-<!--        <property name="connection.url">jdbc:postgresql://xcnc41.comp.nus.edu.sg:30000/test?sslmode=disable</property>-->
+        <!--        <property name="connection.url">jdbc:postgresql://localhost:26257/test?sslmode=disable</property>-->
+        <property name="connection.url">jdbc:postgresql://xcnc40.comp.nus.edu.sg:30000/test?sslmode=disable</property>
         <property name="connection.username">root</property>
         <property name="connection.password"></property>
-
+        <property name="connection.pool_size">1000</property>
         <!-- Required so a table can be created from the 'Account' class in Sample.java -->
         <property name="hibernate.hbm2ddl.auto">create</property>
         <property name="hibernate.hbm2ddl.import_files">

@@ -48,21 +48,21 @@ public class TopBalanceTransaction {
         }
     }
 
-    public static void main(String[] args){
-        Framework framework = Framework.getInstance(0);
-        framework.initHibernate(); // Initializing Hibernate
-        TopBalanceTransaction t7 = new TopBalanceTransaction();
-        Instant start = Instant.now();
-        List<TopBalanceTransactionOutput> outputList = t7.transactionSeven(0);
-        Instant end = Instant.now();    //calculating end time
-        t7.printOutPut(outputList);
-        Duration timeElapsed = Duration.between(start, end);
-
-        System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
-        System.out.println("-------------DONE-------------");
-
-        framework.destroy();
-    }
+//    public static void main(String[] args){
+//        Framework framework = Framework.getInstance(0);
+//        framework.initHibernate(); // Initializing Hibernate
+//        TopBalanceTransaction t7 = new TopBalanceTransaction();
+//        Instant start = Instant.now();
+//        List<TopBalanceTransactionOutput> outputList = t7.transactionSeven(0);
+//        Instant end = Instant.now();    //calculating end time
+//        t7.printOutPut(outputList);
+//        Duration timeElapsed = Duration.between(start, end);
+//
+//        System.out.println("\nTime taken to complete this transaction: "+ timeElapsed.toMillis() +" milliseconds");
+//        System.out.println("-------------DONE-------------");
+//
+//        framework.destroy();
+//    }
 }
 
 class TopBalanceTransactionOutput {

@@ -21,7 +21,7 @@ public class PaymentTransaction {
             PaymentTransactionOutput paymentTransactionOutput = new PaymentTransactionOutput();
             Session session = null;
             Transaction transaction = null;
-            while (currentTransactionRetryCount < 30){
+            while (true){
                 Instant startTime = Instant.now();
                 try{
                     Framework framework = Framework.getInstance(serverId);
@@ -30,7 +30,7 @@ public class PaymentTransaction {
                     transaction = framework.startTransaction();
                     paymentTransactionOutput = processPaymentTransaction(C_W_ID, C_D_ID, C_ID, PAYMENT, session);
                     transaction.commit();
-                    System.out.println("Committing transaction successfully with retry count : "+currentTransactionRetryCount);
+                    System.out.println("Committing transaction successfully with retry count : "+(currentTransactionRetryCount-1));
                     Instant endTime = Instant.now();
                     printOutput(paymentTransactionOutput);
                     Duration timeElapsed = Duration.between(startTime, endTime);
@@ -38,17 +38,18 @@ public class PaymentTransaction {
                     timeTaken = timeTakenForThisTransaction;
                     break;
                 }catch (Exception e){
-                    log.error("Error occurred while committing payment transaction retry count :"+currentTransactionRetryCount + Thread.currentThread().getName(), e);
-                    System.out.println("Error occurred while committing payment transaction retry count : "+currentTransactionRetryCount + Thread.currentThread().getName());
+                    log.error("Error occurred while committing payment transaction retry count :"+(currentTransactionRetryCount-1) + Thread.currentThread().getName(), e);
+                    System.out.println("Error occurred while committing payment transaction retry count : "+(currentTransactionRetryCount-1) + Thread.currentThread().getName());
                     try {
                         //int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
-                        int sleepMillis = (int)(Math.pow(2, Math.min(currentTransactionRetryCount,11)) * 100) + new Random().nextInt(100);
+                        int sleepMillis = (int)(Math.pow(2, Math.min(currentTransactionRetryCount,9)) * 100) + new Random().nextInt(100);
                         Thread.sleep(sleepMillis);
                     } catch (InterruptedException interruptedException) {
                         interruptedException.printStackTrace();
                     }
-//                    if(transaction != null) transaction.rollback();
-//                    if(session != null) session.close();
+                    if(transaction != null) transaction.rollback();
+                }finally {
+                    if(session != null) session.close();
                 }
             }
             return timeTaken;

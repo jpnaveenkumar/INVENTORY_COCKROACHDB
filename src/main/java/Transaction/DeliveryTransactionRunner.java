@@ -5,6 +5,7 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import javax.persistence.NoResultException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -17,21 +18,27 @@ class DeliveryTransactionExecutor extends Thread {
     int D_ID;
     int CARRIER_ID;
     int serverId;
-    static Double timeTakenSoFar = 0.0;
     CountDownLatch latch;
+    DeliveryTransactionRunner deliveryTransactionRunner;
     static Logger log = Logger.getLogger(DeliveryTransactionExecutor.class.getName());
-    public DeliveryTransactionExecutor(int W_ID, int D_ID, int CARRIER_ID, int serverId, CountDownLatch latch){
+    public DeliveryTransactionExecutor(int W_ID, int D_ID, int CARRIER_ID, int serverId, CountDownLatch latch, DeliveryTransactionRunner deliveryTransactionRunner){
         this.W_ID = W_ID;
         this.D_ID = D_ID;
         this.CARRIER_ID = CARRIER_ID;
         this.serverId = serverId;
         this.latch = latch;
-
+        this.deliveryTransactionRunner = deliveryTransactionRunner;
     }
     public void processDeliveryTransactionRunner(Session session){
         String selectSmallerOrderIDQuery = String.format("(select o_id, o_c_id from orders where o_w_id = %d and o_d_id = %d and o_carrier_id = %s order by o_id limit 1)", W_ID, this.D_ID , "'" + null + "'");
         Query q0 = session.createNativeQuery(selectSmallerOrderIDQuery);
-        Object[] o_obj = (Object[])q0.getSingleResult();
+        Object[] o_obj;
+        try
+        {
+            o_obj = (Object[])q0.getSingleResult();
+        }catch (NoResultException e){
+            return;
+        }
         Integer o_id = (Integer) o_obj[0]; //N
         Integer o_c_id = (Integer) o_obj[1]; //C
 
@@ -62,9 +69,9 @@ class DeliveryTransactionExecutor extends Thread {
         int currentTransactionRetryCount = 0;
         Session session = null;
         Double timeTaken = 0.0;
-        Integer transactionRetryThreshold = 30;
+        Integer transactionRetryThreshold = 100;
         Transaction transaction = null;
-        while (currentTransactionRetryCount < transactionRetryThreshold){
+        while (true){
             Instant startTime = Instant.now();
             try{
                 Framework framework = Framework.getInstance(serverId);
@@ -76,25 +83,27 @@ class DeliveryTransactionExecutor extends Thread {
                 Instant endTime = Instant.now();
                 Duration timeElapsed = Duration.between(startTime, endTime);
                 timeTaken = (double) timeElapsed.toMillis() / 1000;
-                timeTakenSoFar = timeTakenSoFar + timeTaken;
+                this.deliveryTransactionRunner.timeTaken += timeTaken;
+                //timeTakenSoFar = timeTakenSoFar + timeTaken;
                 latch.countDown();
-                System.out.println("Committing transaction successfully with retry count : "+currentTransactionRetryCount);
+                System.out.println("Committing transaction successfully with retry count : "+(currentTransactionRetryCount-1));
                 break;
             }catch (Exception e){
-                log.error("Error occurred while committing delivery transaction retry count :"+currentTransactionRetryCount + Thread.currentThread().getName(), e);
-                System.out.println("Error occurred while delivery committing transaction retry count : "+currentTransactionRetryCount + Thread.currentThread().getName());
+                log.error("Error occurred while committing delivery transaction retry count :"+(currentTransactionRetryCount-1) + Thread.currentThread().getName(), e);
+                System.out.println("Error occurred while delivery committing transaction retry count : "+(currentTransactionRetryCount-1) + Thread.currentThread().getName());
                 if(currentTransactionRetryCount == transactionRetryThreshold){
                     latch.countDown();
                 }
                 try {
                     //int sleepMillis = (int)(Math.pow(2, currentTransactionRetryCount) * 100) + new Random().nextInt(100);
-                    int sleepMillis = (int)(Math.pow(2, Math.min(currentTransactionRetryCount,11)) * 100) + new Random().nextInt(100);
+                    int sleepMillis = (int)(Math.pow(2, Math.min(currentTransactionRetryCount,9)) * 100) + new Random().nextInt(100);
                     Thread.sleep(sleepMillis);
                 } catch (InterruptedException interruptedException) {
                     interruptedException.printStackTrace();
                 }
-//                if(transaction != null) transaction.rollback();
-//                if(session != null) session.close();
+                if(transaction != null) transaction.rollback();
+            }finally {
+                if(session != null) session.close();
             }
         }
     }
@@ -102,21 +111,25 @@ class DeliveryTransactionExecutor extends Thread {
 
 public class DeliveryTransactionRunner{
 
+    public Double timeTaken = 0.0;
+
     public Double processDeliveryTransaction(int W_ID, int CARRIER_ID, int serverId) throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(10);
         for(int districtNumber = 1; districtNumber <= 10; districtNumber++){
-            DeliveryTransactionExecutor deliveryTransactionExecutor = new DeliveryTransactionExecutor(W_ID, districtNumber, CARRIER_ID, serverId, latch);
+            DeliveryTransactionExecutor deliveryTransactionExecutor = new DeliveryTransactionExecutor(W_ID, districtNumber, CARRIER_ID, serverId, latch, this);
             deliveryTransactionExecutor.start();
         }
         latch.await();
-        return DeliveryTransactionExecutor.timeTakenSoFar;
+        return this.timeTaken/10;
     }
 
 //    public static void main(String[] args) throws InterruptedException {
 //        Framework framework = Framework.getInstance(0);
 //        framework.initHibernate();
 //        DeliveryTransactionRunner driver = new DeliveryTransactionRunner();
-//        driver.processDeliveryTransaction(1, 7, 0);
+//        Double dd = driver.processDeliveryTransaction(1, 7, 0);
+//        Double dd1 = driver.processDeliveryTransaction(1, 7, 0);
+//        System.out.println(dd+" "+dd1);
 //        framework.destroy();
 //    }
 }

@@ -60,7 +60,7 @@ public class Framework {
         this.session.close();
     }
 
-    public void initHibernate()
+    public void initHibernate(Boolean refreshDatabase)
     {
 //        sessionFactory = new Configuration()
 //                .configure("hibernate.cfg.xml")
@@ -74,17 +74,31 @@ public class Framework {
 //                .addAnnotatedClass(ItemByCustomer.class)
 //                .buildSessionFactory();
 
-        sessionFactory_40 = new Configuration()
-                .configure("hibernate_40.cfg.xml")
-                .addAnnotatedClass(Warehouse.class)
-                .addAnnotatedClass(District.class)
-                .addAnnotatedClass(Customer.class)
-                .addAnnotatedClass(Item.class)
-                .addAnnotatedClass(Order.class)
-                .addAnnotatedClass(OrderLine.class)
-                .addAnnotatedClass(Stock.class)
-                .addAnnotatedClass(ItemByCustomer.class)
-                .buildSessionFactory();
+        if(refreshDatabase){
+            sessionFactory_40 = new Configuration()
+                    .configure("hibernate.cfg.xml") // state is create for node 40
+                    .addAnnotatedClass(Warehouse.class)
+                    .addAnnotatedClass(District.class)
+                    .addAnnotatedClass(Customer.class)
+                    .addAnnotatedClass(Item.class)
+                    .addAnnotatedClass(Order.class)
+                    .addAnnotatedClass(OrderLine.class)
+                    .addAnnotatedClass(Stock.class)
+                    .addAnnotatedClass(ItemByCustomer.class)
+                    .buildSessionFactory();
+        }else{
+            sessionFactory_40 = new Configuration()
+                    .configure("hibernate_40.cfg.xml") // state is update for node 40
+                    .addAnnotatedClass(Warehouse.class)
+                    .addAnnotatedClass(District.class)
+                    .addAnnotatedClass(Customer.class)
+                    .addAnnotatedClass(Item.class)
+                    .addAnnotatedClass(Order.class)
+                    .addAnnotatedClass(OrderLine.class)
+                    .addAnnotatedClass(Stock.class)
+                    .addAnnotatedClass(ItemByCustomer.class)
+                    .buildSessionFactory();
+        }
 
         sessionFactory_41 = new Configuration()
                 .configure("hibernate_41.cfg.xml")

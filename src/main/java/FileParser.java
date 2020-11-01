@@ -1,5 +1,6 @@
 import Transaction.*;
 import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -181,6 +182,7 @@ public class FileParser {
             System.out.println("Failed during file parsing");
             e.printStackTrace();
         }
+        log.info("Test case file name : "+testCaseFileName+ " count so far : "+ fileParserOutput.numberOfTransactions);
         fileParserOutput.numberOfTransactions = numberOfTransactions;
         fileParserOutput.totalExecutionTime = totalExecutionTime;
         fileParserOutput.transactionThroughput = fileParserOutput.numberOfTransactions / fileParserOutput.totalExecutionTime;

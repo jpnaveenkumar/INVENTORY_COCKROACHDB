@@ -37,6 +37,7 @@ public class Driver {
 
     static Integer experimentNumber;
     static Integer serverId;
+    static boolean refreshDatabase;
     Map<Integer, Integer> experimentNumberVsNumberOfClients = new HashMap<>();
     Map<Integer, Integer> experimentNumberVsNumberOfServers = new HashMap<>();
 
@@ -79,16 +80,25 @@ public class Driver {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter the Experiment Number : ");
         experimentNumber = scanner.nextInt();
-        System.out.println("Enter the Server Id : ");
+        System.out.println("Enter the Server Id (from 1 to 5): ");
         serverId = scanner.nextInt();
+        System.out.println("Do you want to refresh Database State ? (yes/no)");
+        String state = scanner.next();
+        if(state.toLowerCase().equals("yes")){
+            refreshDatabase = true;
+        }else{
+            refreshDatabase = false;
+        }
         System.out.println("Initializing Hibernate........");
     }
 
     public static void main(String args[]) throws IOException, InterruptedException {
         Driver.readInputFromConsole();
         Framework framework = Framework.getInstance(0);
-        System.out.println("Creating Tables and Importing Data through sql script .......");
-        framework.initHibernate();
+        if(refreshDatabase) {
+            System.out.println("Creating Tables and Importing Data through sql script .......");
+        }
+        framework.initHibernate(refreshDatabase);
         Driver driver = new Driver();
         driver.init();
         framework.destroy();
