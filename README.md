@@ -69,4 +69,4 @@ c) Enter the Experiment Number (5 to 8) => Enter any experiment number between 5
 
 d) Enter the Server Id (from 1 to 5) => Enter any number between 1 to 5 uniquely in every instance (this is to decide what set of client files to execute on the current instance).
 
-e) Do you want to refresh Database State (yes/no) ? yes to refresh the data in database and no if not.
+e) Do you want to refresh Database State (yes/no) ? yes to refresh the data (yes if running the experiment for first time as no data is found) in database and no if not.
