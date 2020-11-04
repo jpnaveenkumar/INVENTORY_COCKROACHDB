@@ -10,6 +10,27 @@
 
 > export PATH=$PATH:'COCKROACHDB_INSTALLATION_DIRECTORY_HERE/cockroachDB'
 
+#### c) starting cockroachDB
+
+server instance 40 => 
+> cockroach start --insecure --store=teamrnode1 --listen-addr=xcnc40.comp.nus.edu.sg:30000 --http-addr=xcnc40.comp.nus.edu.sg:8081 --join=xcnc40.comp.nus.edu.sg:30000,xcnc41.comp.nus.edu.sg:30000,xcnc42.comp.nus.edu.sg:30000 --max-sql-memory=.3 --cache=.25 --background
+
+server instance 41 => 
+> cockroach start --insecure --store=teamrnode1 --listen-addr=xcnc41.comp.nus.edu.sg:30000 --http-addr=xcnc41.comp.nus.edu.sg:8081 --join=xcnc40.comp.nus.edu.sg:30000,xcnc41.comp.nus.edu.sg:30000,xcnc42.comp.nus.edu.sg:30000 --max-sql-memory=.3 --cache=.25 --background
+
+server instance 42 => 
+> cockroach start --insecure --store=teamrnode1 --listen-addr=xcnc42.comp.nus.edu.sg:30000 --http-addr=localhost:8081 --join=xcnc40.comp.nus.edu.sg:30000,xcnc41.comp.nus.edu.sg:30000,xcnc42.comp.nus.edu.sg:30000 --max-sql-memory=.3 --cache=.25 --background
+
+server instance 43 => 
+> cockroach start --insecure --store=teamrnode1 --listen-addr=xcnc43.comp.nus.edu.sg:30000 --http-addr=localhost:8081 --join=xcnc40.comp.nus.edu.sg:30000,xcnc41.comp.nus.edu.sg:30000,xcnc42.comp.nus.edu.sg:30000 --max-sql-memory=.3 --cache=.25 --background
+
+server instance 44 => 
+> cockroach start --insecure --store=teamrnode1 --listen-addr=xcnc44.comp.nus.edu.sg:30000 --http-addr=localhost:8081 --join=xcnc40.comp.nus.edu.sg:30000,xcnc41.comp.nus.edu.sg:30000,xcnc42.comp.nus.edu.sg:30000 --max-sql-memory=.3 --cache=.25 --background
+
+Run the following command in any one of the instances :
+
+> cockroach init --insecure --host=xcnc41.comp.nus.edu.sg:30000
+
 ### 2) Building project source code for running
 
 #### a) Download Maven and unzip
@@ -45,5 +66,7 @@ b) Executing the above command will ask for following inputs :
     Enter the Server Id (from 1 to 5):
     Do you want to refresh Database State (yes/no) ? 
 c) Enter the Experiment Number (5 to 8) => Enter any experiment number between 5 to 8 to run.
-d) Enter the Server Id (from 1 to 5) => Enter any number between 1 to 5 (this is to decide what set of client files to execute on the current instance).
+
+d) Enter the Server Id (from 1 to 5) => Enter any number between 1 to 5 uniquely in every instance (this is to decide what set of client files to execute on the current instance).
+
 e) Do you want to refresh Database State (yes/no) ? yes to refresh the data in database and no if not.
