@@ -85,11 +85,11 @@ public class Driver {
     static void readInputFromConsole()
     {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter the Experiment Number : ");
+        System.out.println("Enter the Experiment Number (5 to 8): ");
         experimentNumber = scanner.nextInt();
         System.out.println("Enter the Server Id (from 1 to 5): ");
         serverId = scanner.nextInt();
-        System.out.println("Do you want to refresh Database State ? (yes/no)");
+        System.out.println("Do you want to refresh Database State (yes/no)?");
         String state = scanner.next();
         if(state.toLowerCase().equals("yes")){
             refreshDatabase = true;

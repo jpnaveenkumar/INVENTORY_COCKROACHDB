@@ -95,7 +95,7 @@ public class NewOrderTransaction {
         q2.setParameter(2, D_ID);
         q2.setParameter(3, N);
         q2.setParameter(4, C_ID);
-        q2.setParameter(5, null);
+        q2.setParameter(5, "null");
         q2.setParameter(6, num_items);
         q2.setParameter(7, allLocal); //should change
         q2.setParameter(8, o_entry_d);

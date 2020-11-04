@@ -86,11 +86,11 @@ class DeliveryTransactionExecutor extends Thread {
                 this.deliveryTransactionRunner.timeTaken += timeTaken;
                 //timeTakenSoFar = timeTakenSoFar + timeTaken;
                 latch.countDown();
-                System.out.println("Committing transaction successfully with retry count : "+(currentTransactionRetryCount-1));
+                //System.out.println("Committing transaction successfully with retry count : "+(currentTransactionRetryCount-1));
                 break;
             }catch (Exception e){
                 log.error("Error occurred while committing delivery transaction retry count :"+(currentTransactionRetryCount-1) + Thread.currentThread().getName(), e);
-                System.out.println("Error occurred while delivery committing transaction retry count : "+(currentTransactionRetryCount-1) + Thread.currentThread().getName());
+                //System.out.println("Error occurred while delivery committing transaction retry count : "+(currentTransactionRetryCount-1) + Thread.currentThread().getName());
                 if(currentTransactionRetryCount == transactionRetryThreshold){
                     latch.countDown();
                 }
